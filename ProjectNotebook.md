@@ -255,3 +255,133 @@ You can play around with the th=0.5 which is a filtering input. I keep it low at
     git remote add origin <link to repository>
     git push -u origin main
     ```
+4. Directions to run for updating file in GitHub repository:
+    - Open terminal and enter the folder of the GitHub repository/project you want to update
+    - Type into terminal: `git add <file>` and then hit `enter`
+    - Type into terminal `git status` and then hit `enter` (this step is optional)
+    - Type into terminal `git commit -m ‘type any message here'` and then hit `enter`
+    - Type into terminal `git push` and then hit `enter`
+
+## Clustering To Do List
+- Update centrolign_automater.sh to work with a singular input FASTA file that has multiple seqeunces instead of just a directory with individual FASTA files per sequence
+    - Then update percent identity calculation script to calculate percent identity between each sequence
+- Calculate sizes of each sequence 
+- Try clustering based on size
+- Try clustering based on percent identity
+
+## Clustering
+- Create two directories for different types of clustering
+    - By size: `/private/groups/migalab/bmahi/chr1_bsat_project/model2/sizeClusters`
+    - By percent identity: `/private/groups/migalab/bmahi/chr1_bsat_project/model2/peridClusters`
+- Size clustering
+    1. Extract seq sizes into a text file: `awk '/^>/ {if (seq) print length(seq); print $0; seq=""} !/^>/ {seq=seq $0} END {if (seq) print length(seq)}' ../chr1bsatResults2_filtered.fa | awk 'NR%2==0' > seqSizes.txt`
+    2. Create python script to cluster based on size: `size_clustering.py`
+        - File with clusters in csv format: `size_clusters.csv`
+        - File with clusters in text format: `sizeClusters.txt`
+        - Dendrogram: `size_clustering_dendrogram_colored.png`
+    3. Create script to make a BED file that colors sequences based on cluster: `clusters_to_bed.py`
+        - Load it into the UCSC GB with: `track name="SizeClusters" description="Size-based clusters" itemRgb="On"`
+
+![Size Clusters on Genome Browser](sizeClusters_onGB.png)
+
+- Percent identity clustering:
+    1. Copy my centrolign automation script to run alignments within one single FASTA file: `centrolign_automater.sh`
+        - Creates a directory that contains all alignment text files: `alignments`
+    2. Copy my percent identity calculation script to calculate percent identity using generated alignment files: `calculate_centrolign_identity.sh`
+        - Creates a file that lists all percent identity between sequences: `pairwise_percent_identity.txt`
+    3. Create a script to cluster sequences based on percent identity: `perid_clustering.py`
+        - Creates a dendrogram of the clustering: `perid_clusters_dendrogram.png`
+        - Also creates a `csv` file and a `txt` file with cluster assignments: `perid_clusters_assignments.csv`/`perid_clusters_assignments.txt`
+    4. Write a script to create a BED file that colors sequences based on cluster assignments: `perid_clusters_to_bed.py`
+        - Load it into the UCSC GB with: `track name='perid_clusters.bed' description='perid_clusters.bed'`
+
+![Percent Identity Clusters on Genome Browser](peridClusters_onGB.png)
+
+- Here is a side-by-side comparisons of both clustering visualizations:
+
+![Size vs Percent Identity Clusters on Genome Browser](perid_vs_size_clustering_onGB.png)
+
+## Recreate Fedor's Plots w/ New Clusters Per Cluster
+- Commands to create these plots:
+    ```
+    # Create FASTA file with sequences from each cluster
+    bedtools getfasta -fi ../chm13v2.0_chr1 -bed clusters.bed -fo cluster#.fa
+
+    # Create aligned FASTA file with cluster#.fa
+    muscle -super5 cluster#.fa -output cluster#_aligned.fa
+
+    # Create Fedor's plot
+    python3 ../plot_alignment.py -a cluster#_aligned.fa
+    ```
+- Create a script that automates the previous process: `clustering_workflow.py`
+    - Creates the following files for each cluster:
+        1. Cluster BED file
+        2. Cluster FASTA file
+        3. Cluster aligned FASTA file
+        4. Fedor's Plot for each cluster
+- Size clusters:
+
+    Cluster 1
+    ![Size Cluster 1 Fedor Plot](sizeClusterPlots/cluster1_aligned_alignment_plot.png)
+
+    Cluster 2
+    ![Size Cluster 2 Fedor Plot](sizeClusterPlots/cluster2_aligned_alignment_plot.png)
+
+    Cluster 3
+    ![Size Cluster 3 Fedor Plot](sizeClusterPlots/cluster3_aligned_alignment_plot.png)
+
+    Cluster 4
+    ![Size Cluster 4 Fedor Plot](sizeClusterPlots/cluster4_aligned_alignment_plot.png)
+
+    Cluster 5
+    ![Size Cluster 5 Fedor Plot](sizeClusterPlots/cluster5_aligned_alignment_plot.png)
+
+    Cluster 6
+    ![Size Cluster 6 Fedor Plot](sizeClusterPlots/cluster6_aligned_alignment_plot.png)
+
+    Cluster 7 (only contains one sequence)
+    ![Size Cluster 7 Fedor Plot](sizeClusterPlots/cluster7_aligned_alignment_plot.png)
+
+- Percent identity clusters:
+
+    Cluster 1
+    ![Percent Identity Cluster 1 Fedor Plot](percentIdentityPlots/cluster1_aligned_alignment_plot.png)
+
+    Cluster 2
+    ![Percent Identity Cluster 2 Fedor Plot](percentIdentityPlots/cluster2_aligned_alignment_plot.png)
+
+    Cluster 3
+    ![Percent Identity Cluster 3 Fedor Plot](percentIdentityPlots/cluster3_aligned_alignment_plot.png)
+
+    Cluster 4
+    ![Percent Identity Cluster 4 Fedor Plot](percentIdentityPlots/cluster4_aligned_alignment_plot.png)
+
+    Cluster 5 (only contains once sequence)
+    ![Percent Identity Cluster 5 Fedor Plot](percentIdentityPlots/cluster5_aligned_alignment_plot.png)
+
+    Cluster 6 (only contains once sequence)
+    ![Percent Identity Cluster 6 Fedor Plot](percentIdentityPlots/cluster6_aligned_alignment_plot.png)
+
+    Cluster 7 (only contains once sequence)
+    ![Percent Identity Cluster 7 Fedor Plot](percentIdentityPlots/cluster7_aligned_alignment_plot.png)
+
+    Cluster 8 (only contains once sequence)
+    ![Percent Identity Cluster 8 Fedor Plot](percentIdentityPlots/cluster8_aligned_alignment_plot.png)
+
+    Cluster 9 (only contains once sequence)
+    ![Percent Identity Cluster 9 Fedor Plot](percentIdentityPlots/cluster9_aligned_alignment_plot.png)
+
+    Cluster 10
+    ![Percent Identity Cluster 10 Fedor Plot](percentIdentityPlots/cluster10_aligned_alignment_plot.png)
+
+    Cluster 11
+    ![Percent Identity Cluster 11 Fedor Plot](percentIdentityPlots/cluster11_aligned_alignment_plot.png)
+
+    Cluster 12
+    ![Percent Identity Cluster 12 Fedor Plot](percentIdentityPlots/cluster12_aligned_alignment_plot.png)
+
+    Cluster 13 (only contains once sequence)
+    ![Percent Identity Cluster 13 Fedor Plot](percentIdentityPlots/cluster13_aligned_alignment_plot.png)
+
+    Cluster 14 (only contains once sequence)
+    ![Percent Identity Cluster 14 Fedor Plot](percentIdentityPlots/cluster14_aligned_alignment_plot.png)
