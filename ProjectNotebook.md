@@ -385,3 +385,26 @@ You can play around with the th=0.5 which is a filtering input. I keep it low at
 
     Cluster 14 (only contains once sequence)
     ![Percent Identity Cluster 14 Fedor Plot](percentIdentityPlots/cluster14_aligned_alignment_plot.png)
+
+## Cluster by Size then Percent Identity
+- To get better cluster results, we will take our size based cluster, then cluster those further based on percent identity
+- Create script that runs centrolign for all sequences within each of the 7 size clusters: `run_centrolign_for_size_clusters.sh`
+    - Creates an output directory for each cluster and then populates those directories with centrolign alignment text files (example: `cluster2/alignments`)
+- Create a script that calculates percent identity of all the sequences in each distinct cluster from our newly created alignment files: `compute_cluster_identity.py`
+    - Creates a text file that lists all sequences comparisons with their percent identity in the individual cluster directories
+- Create a script that clusters again based on the percent identities calculates in each size cluster: `subcluster_percent_id.py`
+    - This script will create the following in each individual cluster directory:
+        1. A text file that lists all subclusters and the sequences in each (i.e. Cluster 2.1, 2.2, 2.3, etc.)
+        2. A csv file that lists all the sequences and the subcluster they belong to
+        3. A dendrogram of the subclusters
+    - Size cluster 7 will not produce any of this output since it contains only one sequence
+    - 13 total subclusters identified
+-  Create a script that creates a new BED file of all 65 sequences, but colors each distinct subcluster uniquely: `create_subcluster_bed.py`
+    - Creates a BED file saved as `all_subclusters.bed`
+
+![All Subclusters Visualized on the UCSC Genome Browser](all_subclusters.png)
+
+- This looks like it might have more of an identifiable pattern within the array with the blue and yellow subclusters, but the transitional regions between this "pattern" seem to vary
+- Below is a comparison of all BED files on the UCSC Genome Browser in this order: percent identity clusters, size clusters, subclusters of size clusters based on percent identity
+
+![BED file comparison on Genome Browser](size_vs_perid_vs_subclusters.png)
