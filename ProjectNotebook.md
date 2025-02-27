@@ -387,6 +387,7 @@ You can play around with the th=0.5 which is a filtering input. I keep it low at
     ![Percent Identity Cluster 14 Fedor Plot](percentIdentityPlots/cluster14_aligned_alignment_plot.png)
 
 ## Cluster by Size then Percent Identity
+- Working directory: `/private/groups/migalab/bmahi/chr1_bsat_project/model2/sizeClusters/clusters`
 - To get better cluster results, we will take our size based cluster, then cluster those further based on percent identity
 - Create script that runs centrolign for all sequences within each of the 7 size clusters: `run_centrolign_for_size_clusters.sh`
     - Creates an output directory for each cluster and then populates those directories with centrolign alignment text files (example: `cluster2/alignments`)
@@ -408,3 +409,37 @@ You can play around with the th=0.5 which is a filtering input. I keep it low at
 - Below is a comparison of all BED files on the UCSC Genome Browser in this order: percent identity clusters, size clusters, subclusters of size clusters based on percent identity
 
 ![BED file comparison on Genome Browser](size_vs_perid_vs_subclusters.png)
+
+- Create a script that creates a Fedor plot for each of the subclusters (should be 13 total): `fedor_subclusters_workflow.py`
+    - Workflow:
+        1. Creates a new FASTA file for each subcluster
+        2. Aligns each of these FASTA files with `muscle` to a new FASTA file
+        3. Uses the aligned FASTA file to create a Fedor plot
+        4. Places all Fedor plots in the `subcluster_Fedor_plots` directory
+- See all plots below (note that any empty subcluster plot means that that subcluster has only 1 sequences in it):
+
+![Subcluster 1](subcluster_Fedor_plots/cluster1_1_1.png_alignment_plot.png)
+
+![Subcluster 2](subcluster_Fedor_plots/cluster2_2_1.png_alignment_plot.png)
+
+![Subcluster 3](subcluster_Fedor_plots/cluster2_2_2.png_alignment_plot.png)
+
+![Subcluster 4](subcluster_Fedor_plots/cluster3_3_1.png_alignment_plot.png)
+
+![Subcluster 5](subcluster_Fedor_plots/cluster3_3_2.png_alignment_plot.png)
+
+![Subcluster 6](subcluster_Fedor_plots/cluster4_4_1.png_alignment_plot.png)
+
+![Subcluster 7](subcluster_Fedor_plots/cluster4_4_2.png_alignment_plot.png)
+
+![Subcluster 8](subcluster_Fedor_plots/cluster4_4_3.png_alignment_plot.png)
+
+![Subcluster 9](subcluster_Fedor_plots/cluster5_5_1.png_alignment_plot.png)
+
+![Subcluster 10](subcluster_Fedor_plots/cluster5_5_2.png_alignment_plot.png)
+
+![Subcluster 11](subcluster_Fedor_plots/cluster5_5_3.png_alignment_plot.png)
+
+![Subcluster 12](subcluster_Fedor_plots/cluster5_5_4.png_alignment_plot.png)
+
+![Subcluster 13](subcluster_Fedor_plots/cluster6_6_1.png_alignment_plot.png)
