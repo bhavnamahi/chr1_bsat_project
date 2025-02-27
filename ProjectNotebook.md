@@ -356,19 +356,19 @@ You can play around with the th=0.5 which is a filtering input. I keep it low at
     Cluster 4
     ![Percent Identity Cluster 4 Fedor Plot](percentIdentityPlots/cluster4_aligned_alignment_plot.png)
 
-    Cluster 5 (only contains once sequence)
+    Cluster 5 (only contains one sequence)
     ![Percent Identity Cluster 5 Fedor Plot](percentIdentityPlots/cluster5_aligned_alignment_plot.png)
 
-    Cluster 6 (only contains once sequence)
+    Cluster 6 (only contains one sequence)
     ![Percent Identity Cluster 6 Fedor Plot](percentIdentityPlots/cluster6_aligned_alignment_plot.png)
 
-    Cluster 7 (only contains once sequence)
+    Cluster 7 (only contains one sequence)
     ![Percent Identity Cluster 7 Fedor Plot](percentIdentityPlots/cluster7_aligned_alignment_plot.png)
 
-    Cluster 8 (only contains once sequence)
+    Cluster 8 (only contains one sequence)
     ![Percent Identity Cluster 8 Fedor Plot](percentIdentityPlots/cluster8_aligned_alignment_plot.png)
 
-    Cluster 9 (only contains once sequence)
+    Cluster 9 (only contains one sequence)
     ![Percent Identity Cluster 9 Fedor Plot](percentIdentityPlots/cluster9_aligned_alignment_plot.png)
 
     Cluster 10
@@ -380,10 +380,10 @@ You can play around with the th=0.5 which is a filtering input. I keep it low at
     Cluster 12
     ![Percent Identity Cluster 12 Fedor Plot](percentIdentityPlots/cluster12_aligned_alignment_plot.png)
 
-    Cluster 13 (only contains once sequence)
+    Cluster 13 (only contains one sequence)
     ![Percent Identity Cluster 13 Fedor Plot](percentIdentityPlots/cluster13_aligned_alignment_plot.png)
 
-    Cluster 14 (only contains once sequence)
+    Cluster 14 (only contains one sequence)
     ![Percent Identity Cluster 14 Fedor Plot](percentIdentityPlots/cluster14_aligned_alignment_plot.png)
 
 ## Cluster by Size then Percent Identity
@@ -418,28 +418,41 @@ You can play around with the th=0.5 which is a filtering input. I keep it low at
         4. Places all Fedor plots in the `subcluster_Fedor_plots` directory
 - See all plots below (note that any empty subcluster plot means that that subcluster has only 1 sequences in it):
 
-![Subcluster 1](subcluster_Fedor_plots/cluster1_1_1.png_alignment_plot.png)
+    Subcluster 1:
+    ![Subcluster 1](subcluster_Fedor_plots/cluster1_1_1.png_alignment_plot.png)
 
-![Subcluster 2](subcluster_Fedor_plots/cluster2_2_1.png_alignment_plot.png)
+    Subcluster 2:
+    ![Subcluster 2](subcluster_Fedor_plots/cluster2_2_1.png_alignment_plot.png)
 
-![Subcluster 3](subcluster_Fedor_plots/cluster2_2_2.png_alignment_plot.png)
+    Subcluster 3:
+    ![Subcluster 3](subcluster_Fedor_plots/cluster2_2_2.png_alignment_plot.png)
 
-![Subcluster 4](subcluster_Fedor_plots/cluster3_3_1.png_alignment_plot.png)
+    Subcluster 4:
+    ![Subcluster 4](subcluster_Fedor_plots/cluster3_3_1.png_alignment_plot.png)
 
-![Subcluster 5](subcluster_Fedor_plots/cluster3_3_2.png_alignment_plot.png)
+    Subcluster 5:
+    ![Subcluster 5](subcluster_Fedor_plots/cluster3_3_2.png_alignment_plot.png)
 
-![Subcluster 6](subcluster_Fedor_plots/cluster4_4_1.png_alignment_plot.png)
+    Subcluster 6:
+    ![Subcluster 6](subcluster_Fedor_plots/cluster4_4_1.png_alignment_plot.png)
 
-![Subcluster 7](subcluster_Fedor_plots/cluster4_4_2.png_alignment_plot.png)
+    Subcluster 7:
+    ![Subcluster 7](subcluster_Fedor_plots/cluster4_4_2.png_alignment_plot.png)
 
-![Subcluster 8](subcluster_Fedor_plots/cluster4_4_3.png_alignment_plot.png)
+    Subcluster 8:
+    ![Subcluster 8](subcluster_Fedor_plots/cluster4_4_3.png_alignment_plot.png)
 
-![Subcluster 9](subcluster_Fedor_plots/cluster5_5_1.png_alignment_plot.png)
+    Subcluster 9:
+    ![Subcluster 9](subcluster_Fedor_plots/cluster5_5_1.png_alignment_plot.png)
 
-![Subcluster 10](subcluster_Fedor_plots/cluster5_5_2.png_alignment_plot.png)
+    Subcluster 10:
+    ![Subcluster 10](subcluster_Fedor_plots/cluster5_5_2.png_alignment_plot.png)
 
-![Subcluster 11](subcluster_Fedor_plots/cluster5_5_3.png_alignment_plot.png)
+    Subcluster 11:
+    ![Subcluster 11](subcluster_Fedor_plots/cluster5_5_3.png_alignment_plot.png)
 
-![Subcluster 12](subcluster_Fedor_plots/cluster5_5_4.png_alignment_plot.png)
+    Subcluster 12:
+    ![Subcluster 12](subcluster_Fedor_plots/cluster5_5_4.png_alignment_plot.png)
 
-![Subcluster 13](subcluster_Fedor_plots/cluster6_6_1.png_alignment_plot.png)
+    Subcluster 13:
+    ![Subcluster 13](subcluster_Fedor_plots/cluster6_6_1.png_alignment_plot.png)
