@@ -456,3 +456,12 @@ You can play around with the th=0.5 which is a filtering input. I keep it low at
 
     Subcluster 13:
     ![Subcluster 13](subcluster_Fedor_plots/cluster6_6_1.png_alignment_plot.png)
+
+## Clustering with bSat(BSR) Units 
+- Since we were not able to create nice clusters with our Model 2 data, we will instead attempt clustering with the previously annotated subunits within the array
+    - Start with the individual bSat(BSR) units
+- Steps to do this:
+    1. Download Hailey's chm13.coloredBSAT.sorted.bed
+    2. Transfer to remote server: `scp "C:\Users\bhavn\OneDrive\Documents\Miga_RA\chr1_bsat_project\chm13.coloredBSAT.sorted.bed" bmahi@emerald:/private/groups/migalab/bmahi/chr1_bsat_project/bsrClustering`
+    3. Extract all BSR units from this BED file into a new BED file: `grep -E '^chr1\s.*bSat\(BSR\)' chm13.coloredBSAT.sorted.bed > chm13_chr1_bSatBSR.bed`
+    4. Get all sequences from BSR BED file into a FASTA file: `bedtools getfasta -fi ../chm13v2.0_chr1.fa -bed chm13_chr1_bSatBSR.bed -fo chm13_chr1_bSatBSR.fa`
