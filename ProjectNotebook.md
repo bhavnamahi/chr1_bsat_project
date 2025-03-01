@@ -143,23 +143,24 @@ You can play around with the th=0.5 which is a filtering input. I keep it low at
 - Conduct alignments of the entire bsat array (self-self) via [ModDotPlot](https://github.com/marbl/ModDotPlot)
 - Conduct alignments of inverting bsat regions with each other and with entire array
 - Array coordinates: `chr1:128098616-128594818`
-- Regional coordinates (Note: These are approximated.):
-    - Region 1: `chr1:128098616-128118750`
-    - Region 2: `chr1:128117571-128139959`
-    - Region 3: `chr1:128138986-128178896`
-    - Region 4: `chr1:128178410-128221726`
-    - Region 5: `chr1:128221727-128269424`
-    - Region 6: `chr1:128268938-128275265`
-    - Region 7: `chr1:128274292-128350218`
-    - Region 8: `chr1:128350219-128379421`
-    - Region 9: `chr1:128379422-128435393`
-    - Region 10: `chr1:128434421-128474817`
-    - Region 11: `chr1:128473844-12854036`
-    - Region 12: `chr1:128539064-128558045`
-    - Region 13: `chr1:128557559-128562425`
-    - Region 14: `chr1:128562426-128593575`
+- Regional coordinates (Note: These are approximated):
+    - Region 1: chr1    128098616       128118750
+    - Region 2: chr1    128118751       128139959
+    - Region 3: chr1    128139960       128178896
+    - Region 4: chr1    128178897       128221726
+    - Region 5: chr1    128221727       128269424
+    - Region 6: chr1    128269425       128275265
+    - Region 7: chr1    128275266       128350218
+    - Region 8:chr1    128350219       128379421
+    - Region 9: chr1    128379422       128435393
+    - Region 10: chr1    128435394       128474817
+    - Region 11: chr1    128474818       128534036
+    - Region 12: chr1    128534037       128558045
+    - Region 13: chr1    128558046       128562425
+    - Region 14: chr1    128562426       128594818
 
-![Array Regions](ArrayRegions.png)
+![Array Regions Approximated](ArrayRegions.png)
+![Array Regions Approximated BED on UCSC GB](arrayRegionsOnGB.png)
 
 - **All comparison plots can be found on these [Google Slides](https://docs.google.com/presentation/d/1n2mXxZ9eIiZEDgAC4LCabdKH2VFiMvhhtLJoDDz_7is/edit?usp=sharing)**
     - No significant findings from these plots
@@ -457,6 +458,11 @@ You can play around with the th=0.5 which is a filtering input. I keep it low at
     Subcluster 13:
     ![Subcluster 13](subcluster_Fedor_plots/cluster6_6_1.png_alignment_plot.png)
 
+- All different clusters vs array regions on UCSC Genome Browser:
+
+![All Clusters vs Array Regions 1](clusters_vs_arrayRegions_1.png)
+![All Clusters vs Array Regions 2](clusters_vs_arrayRegions_2.png)
+
 ## Clustering with bSat(BSR) Units 
 - Since we were not able to create nice clusters with our Model 2 data, we will instead attempt clustering with the previously annotated subunits within the array
     - Start with the individual bSat(BSR) units
@@ -465,3 +471,18 @@ You can play around with the th=0.5 which is a filtering input. I keep it low at
     2. Transfer to remote server: `scp "C:\Users\bhavn\OneDrive\Documents\Miga_RA\chr1_bsat_project\chm13.coloredBSAT.sorted.bed" bmahi@emerald:/private/groups/migalab/bmahi/chr1_bsat_project/bsrClustering`
     3. Extract all BSR units from this BED file into a new BED file: `grep -E '^chr1\s.*bSat\(BSR\)' chm13.coloredBSAT.sorted.bed > chm13_chr1_bSatBSR.bed`
     4. Get all sequences from BSR BED file into a FASTA file: `bedtools getfasta -fi ../chm13v2.0_chr1.fa -bed chm13_chr1_bSatBSR.bed -fo chm13_chr1_bSatBSR.fa`
+
+## Mentor Meeting Notes (02/28/2025)
+- Cluster BSRs then composites and see if there is a pattern there
+    - Develop HMM to find 68-bp monomers to cluster
+    - Include BSR regions near telomeric ends
+        - Possible hints exchange between telomeric and pericentromeric regions for bSats
+        - Stop analysis of these regions if they're super messy
+    - BSRs might be more similar to alphas in terms of clean repeat units
+    - Cluster by percent identity should be fine if all units are around 65-70 bp
+        - Double check sizes
+        - Exclude repeats that are super small
+- Create a BED file of regions of chr1 bsat array
+- Potentially include data from HG002
+- Align arrays from chm13 vs HG002
+    - We would have 2 arrays to compare in HG002 since it is diploid
