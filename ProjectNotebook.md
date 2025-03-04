@@ -463,15 +463,6 @@ You can play around with the th=0.5 which is a filtering input. I keep it low at
 ![All Clusters vs Array Regions 1](clusters_vs_arrayRegions_1.png)
 ![All Clusters vs Array Regions 2](clusters_vs_arrayRegions_2.png)
 
-## Clustering with bSat(BSR) Units 
-- Since we were not able to create nice clusters with our Model 2 data, we will instead attempt clustering with the previously annotated subunits within the array
-    - Start with the individual bSat(BSR) units
-- Steps to do this:
-    1. Download Hailey's chm13.coloredBSAT.sorted.bed
-    2. Transfer to remote server: `scp "C:\Users\bhavn\OneDrive\Documents\Miga_RA\chr1_bsat_project\chm13.coloredBSAT.sorted.bed" bmahi@emerald:/private/groups/migalab/bmahi/chr1_bsat_project/bsrClustering`
-    3. Extract all BSR units from this BED file into a new BED file: `grep -E '^chr1\s.*bSat\(BSR\)' chm13.coloredBSAT.sorted.bed > chm13_chr1_bSatBSR.bed`
-    4. Get all sequences from BSR BED file into a FASTA file: `bedtools getfasta -fi ../chm13v2.0_chr1.fa -bed chm13_chr1_bSatBSR.bed -fo chm13_chr1_bSatBSR.fa`
-
 ## Mentor Meeting Notes (02/28/2025)
 - Cluster BSRs then composites and see if there is a pattern there
     - Develop HMM to find 68-bp monomers to cluster
@@ -486,3 +477,31 @@ You can play around with the th=0.5 which is a filtering input. I keep it low at
 - Potentially include data from HG002
 - Align arrays from chm13 vs HG002
     - We would have 2 arrays to compare in HG002 since it is diploid
+- Redo model 2 cluster dendrograms, make them look nice for research paper
+- Reorient previous size and percent identity clusters to match strand switches
+
+## Model 5
+- Directory: `bmahi@emerald:/private/groups/migalab/bmahi/chr1_bsat_project/model5`
+- Fifth model developed to assess relationships between BSR units within the array
+- Repeat unit: `GATCAGTGCAGAGATATGTCACAATGCCCCTGTAGGCAGAGCCTAGACAAGAGTTACATCACCTGGGT`
+    - Retrived from Dfam: https://www.dfam.org/family/DF000000075/model
+    - Had to split in half to get the 68 bp monomer
+- Repeat FASTA: `chr1_bsr_repeat_5.fa`
+- HMM: `chr1bsatModel5.hmm`
+- HMM output: `chr1bsatResults5.out`
+- HMM output->bed: `chr1bsatResults5.bed`
+- Annotated sequences range from 22 to 80 bp (most are 60+ bp)
+- Create a graph to show distribution of sequence lengths
+
+![BSR Sequence Length Distribution](bsr_sequence_lengths.png)
+
+- Set a threshold and filter sequences: `chr1bsatResults5_filtered.fa`
+    - Keep sequences between 65-70 bp: `awk '{ if(($3 - $2) >= 65 && ($3 - $2) <= 70) print }' chr1bsatResults5.bed > chr1bsatResults5_filtered.bed`
+    - 3874 total filtered sequences
+- Extract all sequences in the filtered BED file to a FASTA file to begin alignment: `bedtools getfasta -fi ../chm13v2.0_chr1.fa -bed chr1bsatResults5_filtered.bed -fo chr1bsatResults5_filtered.fa`
+- Use `centrolign_automater.sh` to conduct pairwise alignment for all these sequences using centrolign
+    - Output will be in `peridClusters/alignments`
+- Use `calculate_centrolign_identity.py` to calculate percent identity of all pariwise alignments
+    - Output will be in `peridClusters/pairwise_percent_identity.txt`
+- Generate clusters based on percent identity with `perid_clustering.py`
+    - Output will be written to a text and csv file with cluster ID's
