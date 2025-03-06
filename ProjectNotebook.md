@@ -221,7 +221,7 @@ You can play around with the th=0.5 which is a filtering input. I keep it low at
     - Largest annotation: 2783 bp
     - Most annotations were in the 1,000 to 2,000 range
     - Filtered out everything under 445 bp with: `awk '($3 - $2) > 445' chr1bsatResults2.bed > chr1bsatResults2_filtered.bed`
-- Next I extracted out the sequences from the filtered bed file with the following command: `bedtools getfasta -fi ../chm13v2.0_chr1 -bed chr1bsatResults2_filtered.bed -fo chr1bsatResults2_filtered.fa`
+- Next I extracted out the sequences from the filtered bed file with the following command: `bedtools getfasta -fi ../chm13v2.0_chr1 -bed chr1bsatResults2_filtered.bed -fo chr1bsatResults2_filtered.fa -s`
     - This file contains 65 different sequences
 - Then I want to use [MUSCLE](https://www.drive5.com/muscle/) to create an aligned FASTA file from the filtered FASTA file we just created: `muscle -super5 chr1bsatResults2_filtered.fa -output chr1bsatResults2_filtered_aligned.fa`
 - Finally I use Fedor's plotting script to generate a plot:
@@ -498,7 +498,7 @@ You can play around with the th=0.5 which is a filtering input. I keep it low at
 - Set a threshold and filter sequences: `chr1bsatResults5_filtered.fa`
     - Keep sequences between 65-70 bp: `awk '{ if(($3 - $2) >= 65 && ($3 - $2) <= 70) print }' chr1bsatResults5.bed > chr1bsatResults5_filtered.bed`
     - 3874 total filtered sequences
-- Extract all sequences in the filtered BED file to a FASTA file to begin alignment: `bedtools getfasta -fi ../chm13v2.0_chr1.fa -bed chr1bsatResults5_filtered.bed -fo chr1bsatResults5_filtered.fa`
+- Extract all sequences in the filtered BED file to a FASTA file to begin alignment: `bedtools getfasta -fi ../chm13v2.0_chr1.fa -bed chr1bsatResults5_filtered.bed -fo chr1bsatResults5_filtered.fa -s`
 - Use `centrolign_automater.sh` to conduct pairwise alignment for all these sequences using centrolign
     - Output will be in `peridClusters/alignments`
 - Use `calculate_centrolign_identity.py` to calculate percent identity of all pariwise alignments
