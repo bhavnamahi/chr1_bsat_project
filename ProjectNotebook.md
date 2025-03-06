@@ -363,29 +363,17 @@ You can play around with the th=0.5 which is a filtering input. I keep it low at
     Cluster 6 (only contains one sequence)
     ![Percent Identity Cluster 6 Fedor Plot](percentIdentityPlots/cluster6_aligned_alignment_plot.png)
 
-    Cluster 7 (only contains one sequence)
+    Cluster 7
     ![Percent Identity Cluster 7 Fedor Plot](percentIdentityPlots/cluster7_aligned_alignment_plot.png)
 
     Cluster 8 (only contains one sequence)
     ![Percent Identity Cluster 8 Fedor Plot](percentIdentityPlots/cluster8_aligned_alignment_plot.png)
 
-    Cluster 9 (only contains one sequence)
+    Cluster 9
     ![Percent Identity Cluster 9 Fedor Plot](percentIdentityPlots/cluster9_aligned_alignment_plot.png)
 
-    Cluster 10
+    Cluster 10 (only contains one sequence)
     ![Percent Identity Cluster 10 Fedor Plot](percentIdentityPlots/cluster10_aligned_alignment_plot.png)
-
-    Cluster 11
-    ![Percent Identity Cluster 11 Fedor Plot](percentIdentityPlots/cluster11_aligned_alignment_plot.png)
-
-    Cluster 12
-    ![Percent Identity Cluster 12 Fedor Plot](percentIdentityPlots/cluster12_aligned_alignment_plot.png)
-
-    Cluster 13 (only contains one sequence)
-    ![Percent Identity Cluster 13 Fedor Plot](percentIdentityPlots/cluster13_aligned_alignment_plot.png)
-
-    Cluster 14 (only contains one sequence)
-    ![Percent Identity Cluster 14 Fedor Plot](percentIdentityPlots/cluster14_aligned_alignment_plot.png)
 
 ## Cluster by Size then Percent Identity
 - Working directory: `/private/groups/migalab/bmahi/chr1_bsat_project/model2/sizeClusters/clusters`
