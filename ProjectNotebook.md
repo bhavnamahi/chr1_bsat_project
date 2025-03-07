@@ -382,13 +382,13 @@ You can play around with the th=0.5 which is a filtering input. I keep it low at
     - Creates an output directory for each cluster and then populates those directories with centrolign alignment text files (example: `cluster2/alignments`)
 - Create a script that calculates percent identity of all the sequences in each distinct cluster from our newly created alignment files: `compute_cluster_identity.py`
     - Creates a text file that lists all sequences comparisons with their percent identity in the individual cluster directories
-- Create a script that clusters again based on the percent identities calculates in each size cluster: `subcluster_percent_id.py`
+- Create a script that clusters based on the percent identities calculates in each size cluster: `subcluster_percent_id.py`
     - This script will create the following in each individual cluster directory:
         1. A text file that lists all subclusters and the sequences in each (i.e. Cluster 2.1, 2.2, 2.3, etc.)
         2. A csv file that lists all the sequences and the subcluster they belong to
         3. A dendrogram of the subclusters
     - Size cluster 7 will not produce any of this output since it contains only one sequence
-    - 13 total subclusters identified
+    - 10 total subclusters identified
 -  Create a script that creates a new BED file of all 65 sequences, but colors each distinct subcluster uniquely: `create_subcluster_bed.py`
     - Creates a BED file saved as `all_subclusters.bed`
 
@@ -437,15 +437,6 @@ You can play around with the th=0.5 which is a filtering input. I keep it low at
     Subcluster 10:
     ![Subcluster 10](subcluster_Fedor_plots/cluster5_5_2.png_alignment_plot.png)
 
-    Subcluster 11:
-    ![Subcluster 11](subcluster_Fedor_plots/cluster5_5_3.png_alignment_plot.png)
-
-    Subcluster 12:
-    ![Subcluster 12](subcluster_Fedor_plots/cluster5_5_4.png_alignment_plot.png)
-
-    Subcluster 13:
-    ![Subcluster 13](subcluster_Fedor_plots/cluster6_6_1.png_alignment_plot.png)
-
 - All different clusters vs array regions on UCSC Genome Browser:
 
 ![All Clusters vs Array Regions 1](clusters_vs_arrayRegions_1.png)
@@ -487,8 +478,12 @@ You can play around with the th=0.5 which is a filtering input. I keep it low at
     - Keep sequences between 65-70 bp: `awk '{ if(($3 - $2) >= 65 && ($3 - $2) <= 70) print }' chr1bsatResults5.bed > chr1bsatResults5_filtered.bed`
     - 3874 total filtered sequences
 - Extract all sequences in the filtered BED file to a FASTA file to begin alignment: `bedtools getfasta -fi ../chm13v2.0_chr1.fa -bed chr1bsatResults5_filtered.bed -fo chr1bsatResults5_filtered.fa -s`
+- Remove all duplicate sequences in FASTA file to speed up alignment
+    - `conda install bioconda::seqkit`
+    - Run `seqkit rmdup -s < chr1bsatResults5_filtered.fa > chr1bsatResults5_filtered_rmdup.fa`
+    - New file contains 3672 seqs
 - Use `centrolign_automater.sh` to conduct pairwise alignment for all these sequences using centrolign
-    - Output will be in `peridClusters/alignments`
+    - Output will be in `alignments`
 - Use `calculate_centrolign_identity.py` to calculate percent identity of all pariwise alignments
     - Output will be in `peridClusters/pairwise_percent_identity.txt`
 - Generate clusters based on percent identity with `perid_clustering.py`
