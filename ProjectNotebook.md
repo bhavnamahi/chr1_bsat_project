@@ -437,10 +437,18 @@ You can play around with the th=0.5 which is a filtering input. I keep it low at
     Subcluster 10:
     ![Subcluster 10](subcluster_Fedor_plots/cluster5_5_2.png_alignment_plot.png)
 
+    Subcluster 11:
+    ![Subcluster 11](subcluster_Fedor_plots/cluster5_5_3.png_alignment_plot.png)
+
+    Subcluster 12:
+    ![Subcluster 12](subcluster_Fedor_plots/cluster5_5_4.png_alignment_plot.png)
+
+    Subcluster 13:
+    ![Subcluster 13](subcluster_Fedor_plots/cluster6_6_1.png_alignment_plot.png)
+
 - All different clusters vs array regions on UCSC Genome Browser:
 
 ![All Clusters vs Array Regions 1](clusters_vs_arrayRegions_1.png)
-![All Clusters vs Array Regions 2](clusters_vs_arrayRegions_2.png)
 
 ## Mentor Meeting Notes (02/28/2025)
 - Cluster BSRs then composites and see if there is a pattern there
@@ -488,3 +496,47 @@ You can play around with the th=0.5 which is a filtering input. I keep it low at
     - Output will be in `peridClusters/pairwise_percent_identity.txt`
 - Generate clusters based on percent identity with `perid_clustering.py`
     - Output will be written to a text and csv file with cluster ID's
+
+## Mentor Meeting Notes (03/07/2025)
+- Extract red cluster from percent identity cluster to see true structure
+- Take note that with accounting for strand orientation the plots looked better
+- For paper:
+    - Build narrative -> why did you do what you did -> why -> why'd you do the next thing
+- Consider another alignment algorithm for BSR units
+    - muscle -super5
+    - Clustal Omega
+    - MAFFT -> install (https://anaconda.org/bioconda/mafft)
+- Try clustering all the BSRs with Fedor's plot
+- sbatch scripting (see example below)
+    - Stick with basic parameters that Hailey has set (doesn't take too much mem)
+    - Increase mem/cpu configurations to speed up runs
+    - Modify output name
+    - Make sure conda env is active in script because env variables are not present in the sbatch env
+    - Add time command 
+    - Increase in compute speed with sbatch
+
+```
+#!/bin/bash
+#SBATCH --job-name=run_nonB_DNA.20231031
+#SBATCH --partition=long
+#SBATCH --mail-user=hloucks@ucsc.edu
+#SBATCH --nodes=1
+#SBATCH --mem=100gb
+#SBATCH --ntasks=2
+#SBATCH --cpus-per-task=1
+#SBATCH --output=run_nonB_DNA.20231031.%j.log
+#SBATCH --time=14-0:00
+
+pwd; hostname; date
+set -e
+
+source /opt/miniconda/etc/profile.d/conda.sh
+conda activate /private/home/mcechova/conda/nonB
+
+/private/home/mcechova/non-B_gfa/gfa -seq /private/groups/migalab/hloucks/DeepLineage/datasets/verrko_cen12/cen12.all.fa -out verrko_cen12
+/private/home/mcechova/non-B_gfa/gfa -seq /private/groups/migalab/hloucks/DeepLineage/datasets/verrko_cen10/cen10.all.fa -out verrko_cen10
+
+for f in *gff ; do sed '1d' $f | awk '{print $1, ($4-1), ($5-1), $3, "0", $7, ($4-1), ($5-1), "0,0,0"}' OFS="\t" | sort -k1,1 -k2,2n > $f.bed ; done
+
+echo "Done."
+```
