@@ -542,18 +542,30 @@ echo "Done."
 ```
 
 ## BSR Clustering: 
+- Working directory: `bmahi@emerald:/private/groups/migalab/bmahi/chr1_bsat_project/model5`
 - Try clustering the `chr1bsatResults5_filtered_rmdup.fa` file with Clustal Omega
     - Job ID: [clustalo-I20250309-234033-0145-13985636-p1m](https://www.ebi.ac.uk/jdispatcher/msa/clustalo/summary?jobId=clustalo-I20250309-234033-0145-13985636-p1m)
     - All files saved to `model5_ClustalOmegaAlignment` directory
+    - Create Fedor plot with the MAFFT aligned FASTA: `python ../../plot_alignment.py -a alignment_in_FASTA_format_Seqret.fa`
 - Try MAFFT alignment for `chr1bsatResults5_filtered_rmdup.fa` on the command line as well
     - MAFFT manual page: https://mafft.cbrc.jp/alignment/software/manual/manual.html
     - Install MAFFT: `conda install bioconda::mafft`
     - Run alignment: `"/private/groups/patenlab/bmahi/miniforge3/bin/mafft"  --auto --inputorder "chr1bsatResults5_filtered_rmdup.fa" > "chr1bsatResults5_filtered_rmdup_MAFFT_align.fa"` (formulated command after selecting options with just `mafft`)
+    - All files saved to `model5_MAFFTalignment`
+    - Create Fedor plot with the MAFFT aligned FASTA: `python ../../plot_alignment.py -a chr1bsatResults5_filtered_rmdup_MAFFT_align.fa`
 - Try clustering with MUSCLE on `chr1bsatResults5_filtered_rmdup.fa`
     - Command: `muscle -super5 chr1bsatResults5_filtered_rmdup.fa -output chr1bsatResults5_filtered_rmdup_MUSCLE_aligned.fa`
+    - All files saved to `model5_MUSCLEalignment`
     - Create Fedor plot with the MUSCLE aligned FASTA: `python ../../plot_alignment.py -a chr1bsatResults5_filtered_rmdup_MUSCLE_aligned.fa`
 
-![BSR Unit Fedor Plot](chr1bsatResults5_filtered_rmdup_MUSCLE_aligned_alignment_plot.png)
+Fedor Plot wtih Clustal Omega Alignment:
+![BSR Unit Fedor Plot](alignment_in_FASTA_format_Seqret_alignment_plot.png)
+
+Fedor Plot with MAFFT Alignment:
+![BSR Unit Fedor Plot](chr1bsatResults5_filtered_rmdup_MAFFT_align_alignment_plot.png)
+
+Fedor Plot with MUSCLE Alignment:
+![BSR Unit Fedor Plot with MUSCLE](chr1bsatResults5_filtered_rmdup_MUSCLE_aligned_alignment_plot.png)
 
 - Create a script that is able to calculate percent identity between all sequences in the aligned FASTA files: `alignedFASTA_PIcalc.py`
     - This script uses pairwise percent identity (gaps ignored)
