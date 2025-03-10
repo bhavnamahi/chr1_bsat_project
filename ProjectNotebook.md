@@ -578,3 +578,21 @@ Fedor Plot with MUSCLE Alignment:
             Matches: 6/6 = 100% (ignores the `-`)
             ```
         - Formula: $$ \text{Percent Identity} = \left( \frac{\text{Matches}}{\text{Non-gap Positions Compared}} \right) \times 100 $$
+    - Calculations:
+        - Clustal alignment: `/private/groups/migalab/bmahi/chr1_bsat_project/model5/model5_ClustalOmegaAlignment/pairwise_percent_identity.txt`
+        - MAFFT alignment: `/private/groups/migalab/bmahi/chr1_bsat_project/model5/model5_MAFFTalignment/pairwise_percent_identity.txt`
+        - MUSCLE alignment: `/private/groups/migalab/bmahi/chr1_bsat_project/model5/model5_MUSCLEalignment/pairwise_percent_identity.txt`
+- Calculate clusters with percent identity results
+    - Copy over script from model2: `/private/groups/migalab/bmahi/chr1_bsat_project/model2/peridClusters/perid_clustering.py` and update paths for input/output
+        - Clustal Omega: 139 clusters
+        - MAFFT: 80 clusters
+        - MUSCLE: 111 clusters
+- Create a BED file with all sequences with designated clusters:
+    - Copy over script from model2: `/private/groups/migalab/bmahi/chr1_bsat_project/model2/peridClusters/perid_clusters_to_bed.py`
+    - Output BED files:
+        - Clustal Omega: `model5_ClustalOmegaAlignment/perid_clusters_Clustal.bed`
+        - MAFFT: `model5_MAFFTalignment/perid_clusters_MAFFT.bed`
+        - MUSCLE: `model5_MUSCLEalignment/perid_clusters_MUSCLE.bed`
+        - View on GB: https://genome.ucsc.edu/s/bmahi/chr1_bsat_array
+
+![BSR Various Algorithm Clusters on Genome Browser](BSR_3_Algorithm_Alignment_Clusters_onGB.png)
