@@ -540,3 +540,29 @@ for f in *gff ; do sed '1d' $f | awk '{print $1, ($4-1), ($5-1), $3, "0", $7, ($
 
 echo "Done."
 ```
+
+## BSR Clustering: 
+- Try clustering the `chr1bsatResults5_filtered_rmdup.fa` file with Clustal Omega
+    - Job ID: [clustalo-I20250309-234033-0145-13985636-p1m](https://www.ebi.ac.uk/jdispatcher/msa/clustalo/summary?jobId=clustalo-I20250309-234033-0145-13985636-p1m)
+    - All files saved to `model5_ClustalOmegaAlignment` directory
+- Try MAFFT alignment for `chr1bsatResults5_filtered_rmdup.fa` on the command line as well
+    - MAFFT manual page: https://mafft.cbrc.jp/alignment/software/manual/manual.html
+    - Install MAFFT: `conda install bioconda::mafft`
+    - Run alignment: `"/private/groups/patenlab/bmahi/miniforge3/bin/mafft"  --auto --inputorder "chr1bsatResults5_filtered_rmdup.fa" > "chr1bsatResults5_filtered_rmdup_MAFFT_align.fa"` (formulated command after selecting options with just `mafft`)
+- Try clustering with MUSCLE on `chr1bsatResults5_filtered_rmdup.fa`
+    - Command: `muscle -super5 chr1bsatResults5_filtered_rmdup.fa -output chr1bsatResults5_filtered_rmdup_MUSCLE_aligned.fa`
+    - Create Fedor plot with the MUSCLE aligned FASTA: `python ../../plot_alignment.py -a chr1bsatResults5_filtered_rmdup_MUSCLE_aligned.fa`
+
+![BSR Unit Fedor Plot](chr1bsatResults5_filtered_rmdup_MUSCLE_aligned_alignment_plot.png)
+
+- Create a script that is able to calculate percent identity between all sequences in the aligned FASTA files: `alignedFASTA_PIcalc.py`
+    - This script uses pairwise percent identity (gaps ignored)
+        - Only counts positions where neither sequences had a gap (-)
+        - Positions where one or both sequnces have a gap are ignored
+        - Example:
+            ```
+            Seq1: ACGT-GA
+            Seq2: ACGTAGA
+            Matches: 6/6 = 100% (ignores the `-`)
+            ```
+        - Formula: $$ \text{Percent Identity} = \left( \frac{\text{Matches}}{\text{Non-gap Positions Compared}} \right) \times 100 $$
