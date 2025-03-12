@@ -596,3 +596,16 @@ Fedor Plot with MUSCLE Alignment:
         - View on GB: https://genome.ucsc.edu/s/bmahi/chr1_bsat_array
 
 ![BSR Various Algorithm Clusters on Genome Browser](BSR_3_Algorithm_Alignment_Clusters_onGB.png)
+
+- Recluster the BSRs so they have less overall clusters (no more than 20)
+    - Edit script to max out at 20 clusters
+    - Number of clusters:
+        - Clustal Omega: 20
+        - MAFFT: 20
+        - MUSCLE: 20
+
+![BSR Various Algorithm 20 Clusters on Genome Browser](BSR_3_Algorithm_Alignment_20Clusters_onGB.png)
+
+## Model 2 Additional Clustering + Enhancements
+- Cluster the red cluster from the percent identity clustering of Model 2
+- Enhance the dendrograms for the clusters
