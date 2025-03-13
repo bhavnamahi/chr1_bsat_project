@@ -608,4 +608,15 @@ Fedor Plot with MUSCLE Alignment:
 
 ## Model 2 Additional Clustering + Enhancements
 - Cluster the red cluster from the percent identity clustering of Model 2
+    1. Copy the cluster 1 (red cluster) sequences into a separate file
+    2. Use that to create a percent identity file from those sequences (already calculated)
+    3. Copy your clustering script into `perid_clustering_cluster1.py`
+        - Modify input files
+        - Stricter distance for cluster (clusters sequences >= 85% PI)
+        - New clusters in `cluster1_assignments.txt`
+    4. Copy cluster to bed script to create a new bed file for these clusters: `perid_cluster1_to_bed.py`
+        - Output to `perid_cluster1.bed`
+
+![Percent Identity Cluster 1 Reclustered](perid_cluster1.png)
+
 - Enhance the dendrograms for the clusters
