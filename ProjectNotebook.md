@@ -620,3 +620,311 @@ Fedor Plot with MUSCLE Alignment:
 ![Percent Identity Cluster 1 Reclustered](perid_cluster1.png)
 
 - Enhance the dendrograms for the clusters
+    - Dendograms to include in paper:
+        - PI clusters cluster 1 clusters (model 2)
+        - BSR clusters (model 5)
+
+## Pipeline Script Analysis: 
+
+Please note that these steps are based on script analyses from Model 5 development. The script functionality is mostly the same across all models but can vary depending on your needs for each model.
+
+**Step 1**:
+
+Identify repeat unit of interest on the UCSC Genome Browser. Get the sequence of the repeat unit from the Genome Browser if possible, or otherwise create a temporary BED file with estimated repeat coordinates and use `bedtools` to extract sequence from CHM13v2.0 chr1 FASTA file. 
+
+**Step 2**:
+
+Once you have a FASTA file with the target repeat unit then modify the FASTA to have the same sequence repeat twice:
+```
+>seq
+AAATTTTGGG
+>seq
+AAATTTTGGG
+```
+
+If you want to align 2 sequences together for an annotation, you put both sequence in a FASTA file and then create an aligned FASTA file using `muscle -super5`.
+
+Then you just use hmmbuild to create the model:
+
+`hmmbuild myModel.hmm mySeq.alignment.fa`
+
+That should create the `myModel.hmm` file. Then you can search your genome of interest, these are my preferred parameters:
+
+`time nhmmer --cpu 12 --notextw --noali --tblout genome.model.out modelName /path/to/genome.fa`
+
+I then use this [script](https://github.com/enigene/hmmertblout2bed/blob/master/hmmertblout2bed.awk) to convert it into a BED file which is easier to work with:
+
+`awk -v th=0.5 -f hmmertblout2bed.awk genome.out > genome.model.bed`
+
+**Step 3**:
+
+You can check to see if your new BED file is a clean annotation of the array by uploading it to the UCSC Genome Browser for viewing. If you're seeing clean, consistent, and complete annotations, you can move on. If you're seeing high fragmentation then you do not have a solid repeat unit.
+
+**Step 4**: 
+
+Now you want to use your newly created (and verified) BED file to create a FASTA file with all the annotated sequences with:
+
+`bedtools getfasta -fi inputFASTA -bed BEDfile -fo outputFASTA -s`
+
+You need the `-s` flag so you can pull the reverse complement of sequences on the minus strand for correct alignment. 
+
+**Step 5**: 
+
+Now you want to use an alignment tool to align all the sequences in your FASTA file. For all models, we used `centrolign`. However for Model 5, since there were so many sequences, we used different algorithms for compute efficiency such as `Clustal Omega`, `MUSCLE`, and `MAFFT` (no changes made to these algorithms).
+
+Modified `centrolign` parameters:
+
+1. Only query matches that occur at most this many times on either of the two graphs
+`max_count`: 1500 (down from original 3000)
+
+    This parameter sets how many times an anchor can appear in either sequence before it’s deemed too repetitive and discarded. By lowering `max_count` from 3000 to 1500:
+
+    - Fewer extremely repetitive anchors: Anchors that occur more than 1500 times across the two sequences are skipped, meaning we discard very high-copy fragments that are likely not informative (or are alignment “noise”).
+
+    - Better alignment specificity: Excluding those ultra-repetitive matches reduces spurious anchor chaining in repeated regions.
+
+    - Balancing alignment speed: Fewer anchors pass the filter, so the alignment process runs more efficiently.
+
+    Essentially, lowering max_count is a precision trade‐off: you ignore super‐high‐copy k‐mers or local repeats, which often helps in repetitive contexts so your aligner doesn’t over‐interpret those repeats as “valid anchors.”
+
+2. The maximum number of matches between two graphs that will be considered during chaining
+`max_num_match_pairs`: 625000 (down from original 1250000)
+
+    `max_num_match_pairs` controls how many total anchor pairs can be retained for chain building.
+
+    - Avoiding memory/time blow‐up: In highly repetitive or long regions, the number of potential anchor matches can skyrocket. Halving `max_num_match_pairs` to 625k helps manage large alignment tasks.
+
+    - Streamlined chaining: With fewer match pairs, the chaining process is less likely to be overwhelmed by borderline or redundant anchors.
+
+    Lowering this maximum count is another filter that effectively caps how many “anchor hits” pass to the chaining step, mitigating potential computational overhead in large or repeated sequences.
+
+3. The method used to partition the anchor chain into alignable and unalignable regions:
+    - 0: Do not attempt to partition; consider all sequences alignable
+    - 1: Choose the highest scoring set of anchors
+    - 2: Choose the highest scoring set of anchors, with each alignable segment having limit on its average value
+    - 3: Choose the highest scoring set of anchors, with each alignable segment having limit on a windowed average value
+
+    `constraint_method`: 0
+
+    Centrolign offers multiple strategies (0 through 3) to partition the anchor chain into alignable vs. unalignable segments. Setting:
+
+    0: Do not attempt to partition; treat all sequences as if they can align.
+
+    Why choose “0”?
+
+    - Simplicity: You tell the aligner not to skip or mask any sub-region. Instead, it attempts to align everything, possibly revealing partial alignments in complicated, repetitive blocks.
+
+    - Fewer heuristics: The advanced partitioning modes (1–3) can sometimes skip or break up repetitive segments if they fail certain score thresholds. By disabling partitioning, you ensure you capture all potential alignment signals—especially if you’re exploring novel or poorly annotated repeats.
+
+    In repetitive contexts, toggling this off might allow more direct control over how anchors chain, particularly if you’re manually adjusting other thresholds (like `max_count`, `max_num_match_pairs`).
+
+4. The minimum total score that an alignable segment must have                                                        `minimum_segment_score`: 6500 (down from original 15000)
+
+    This sets the lowest total alignment score for a segment to be considered alignable.
+
+    - Lower threshold -> more segments pass: Reduces the minimum anchor‐chain “score” needed, allowing coverage of slightly lower‐similarity segments.
+
+    - Capturing borderline repeats: If your array has moderate or partial matches, a lower threshold ensures those partial alignments survive, rather than being thrown out.
+
+    - Better coverage in repeated arrays: In very repetitive or diverged regions, a high minimum score might prematurely exclude alignments, but a moderate setting like 6500 allows you to see more subalignments in mosaic or inversion blocks.
+
+    Effectively, by reducing minimum_segment_score, you’re broadening the net to include subalignments that would previously fall below the alignment score “cut line.”
+
+We conduct the alignment with an automated alignment script, `centrolign_automater.sh` that is outlined below:
+
+1. **Command‐Line Argument Handling**  
+   - Checks for exactly two arguments:  
+     1) A multi‐sequence FASTA file containing all sequences of interest.  
+     2) An output directory to store pairwise alignment results.  
+   - Exits with a usage message if arguments are incorrect.
+
+2. **Configuration Setup**  
+   - Defines paths for the `centrolign` executable and its `config.yaml` file.  
+   - Ensures the output directory exists (or creates it if needed).
+
+3. **Extract Sequence Names**  
+   - Uses `grep` for lines starting with `>` in the FASTA, removing the `>` to produce a file (`seq_names.txt`) with one sequence name per line.  
+   - Loads these sequence names into an array (`seq_names`), counting how many sequences are found.
+
+4. **Pairwise Alignment Loop**  
+   - Iterates over each pair of sequences (i < j) so each pair is aligned once:
+     - Avoids self‐self comparisons and duplicate reversed pairs.
+
+5. **Temporary FASTA Construction**  
+   - For each pair, an awk command extracts only those two sequences (by name) from the multi‐sequence FASTA into a temporary FASTA file.  
+   - This ensures `centrolign` receives exactly those two sequences for alignment.
+
+6. **Centrolign Config Updates**  
+   - Dynamically replaces the `fasta_name:` field in `config.yaml` with the temporary FASTA path.  
+   - Repeated for each new pair so `centrolign` always points to the correct 2-sequence file.
+
+7. **Running Centrolign**  
+   - Invokes `centrolign` with the updated config.  
+   - Outputs each result to a `.txt` file named after the two sequences being compared (e.g., `seq1_vs_seq2.txt`).
+
+8. **Cleanup & Reset**  
+   - Deletes the temporary FASTA after each pairwise run.  
+   - Resets `fasta_name:` in `config.yaml` back to `""` so subsequent loops start fresh.
+
+9. **Completion Message**  
+   - After all pairs have been processed, prints a message indicating that all pairwise alignments completed successfully.
+
+**Step 6**:
+
+After you have a directory of all the alignments, you want to calculate the percent identity between all the clusters. You can do this with a script called `calculate_centrolign_identity.py` outlined below:
+
+1. **FASTA Parsing (`parse_fasta_lengths`)**  
+   - Reads a multi‐sequence FASTA file (e.g., containing sequences like `>chr1:123-456`).  
+   - Tracks the cumulative length for each sequence.  
+   - Returns a dictionary mapping `sequence_name -> length` (e.g. `{"chr1:123-456": 3345, ...}`).
+
+2. **Name Normalization (`underscore_to_colon`)**  
+   - Converts a string such as `chr1_128105775-128108533` to `chr1:128105775-128108533`.  
+   - Replaces the first underscore with a colon to unify naming between alignment files and the FASTA naming scheme.
+
+3. **Summation of Matches from Alignment (`sum_matches_before_equals`)**  
+   - Opens each alignment file (Centrolign output).  
+   - Uses a regex (`(\d+)=`) to find all occurrences of digits preceding an "=" sign (e.g., `324=`).  
+   - Sums those digits to determine the total number of matching bases in the alignment.
+
+4. **Main Workflow**  
+   - Load lengths: Calls `parse_fasta_lengths(FASTA_FILE)` to build a `{sequence_name -> length}` dictionary.  
+   - Initialize output: Writes a header line ("Seq1\tSeq2\tPercent Identity") to a results file.  
+   - Iterate alignment files: Looks for files matching `chr1*_vs_chr1_*.txt` in a specified alignment directory.  
+   - Extract sequence names: For each alignment file name (e.g. `"chr1_128105775-128108533_vs_chr1_128109451-128110668.txt"`), it splits on `"_vs_"` and uses `underscore_to_colon` to restore the original colon format.  
+   - Calculate percent identity:  
+     1. Retrieves total matches from `sum_matches_before_equals`.  
+     2. Looks up the lengths of the two sequences in the dictionary.  
+     3. Computes `%ID = (total_matches / length_of_longer_seq) * 100`.  
+     4. If either sequence name is missing in the FASTA dictionary or length is zero, outputs `"NA"`.  
+   - Write results: Writes the final result line `Seq1_colon\tSeq2_colon\tPercentID%` (or NA) to the output file.
+
+5. **Completion Message**  
+   - After processing all alignment files, the script logs where the final results are saved.
+
+**Step 7**:
+
+Once you've calculated all the percent identities from the alignment directory, you can cluster and create a dendrogram based on the most closely related sequences. This can be done with the script `perid_clustering.py` outlined below:
+
+1. **Script Purpose**  
+   - Takes a file of pairwise percent identities (e.g., "chr1:12345-67890\tchr1:98765-99999\t92.50%") and converts them into a distance matrix where distance = 1 − (percent_identity/100).  
+   - Uses hierarchical clustering (Ward’s method) to group these sequences, limiting to a maximum of 20 clusters (clustering varies by model).  
+   - Plots a dendrogram and appends a color bar and legend to visualize cluster membership.
+
+2. **Reading Pairwise Percent Identity**  
+   - `PERCENT_FILE` is read into a `pandas DataFrame`.  
+   - Trailing “%” is stripped, and the numeric values are interpreted as floating‐point.  
+   - Collects all unique sequence names from the two columns (“Seq1”, “Seq2”).
+
+3. **Distance Matrix Construction**  
+   - Creates an NxN matrix for N total sequences.  
+   - Fills each cell with `1 – (PercentIdentity/100)` to obtain the “distance.”  
+   - Missing pairs (NaN) are replaced with a distance of 1.0, ensuring every pair has a valid distance.
+
+4. **Hierarchical Clustering**  
+   - Converts the full NxN matrix to a condensed distance vector via `squareform()`.  
+   - Performs Ward’s linkage with `linkage(condensed_dist, method='ward')`.  
+   - Limits the final clusters to 20 via `fcluster(Z, t=20, criterion='maxclust')` (clustering varies by model).
+
+5. **Dendrogram Plotting**  
+   - Creates a large figure with a main axis for the dendrogram.  
+   - Sets `color_threshold=0` and `above_threshold_color='black'`, ensuring all branches are black.  
+   - The x‐axis labels (sequence names) have a reduced font size to accommodate large sets of sequences.
+
+6. **Cluster Assignments & Output**  
+   - Saves cluster labels to a CSV (`perid_clusters_assignments.csv`).  
+   - Also writes a human‐readable text file grouping sequences by cluster ID.
+
+7. **Color Bar & Legend**  
+   - Creates a 1×N color bar below the dendrogram, mapping each leaf node’s cluster to a distinct color (unique to Model 5).  
+   - Defines a `cluster_color_map` for up to 20 clusters (RGB tuples or recognized color names) (also varies by model).  
+   - Renders a small color legend listing each cluster and its corresponding color.
+
+8. **Final Figure Save**  
+   - Combines the dendrogram, color bar, and legend into one figure.  
+   - Exports as a high‐resolution `.png`, concluding the script.
+
+Please note that a similar method is used to cluster based on size of the sequences in Model 2. The only difference is that the criteria for clustering is sequence length and not percent identity.
+
+---
+
+**Ward’s Method**:
+
+Ward’s method is a specific type of agglomerative hierarchical clustering that focuses on minimizing the total within‐cluster variance (or sum of squared distances) at every merge step. Below is a detailed discussion of how it operates and why it is suited for clustering repetitive sequence identity data.
+
+**How Ward’s Method Works**:
+
+1. **Initialization**  
+   - Each sequence (data point) starts in its own cluster.
+
+2. **Iterative Merging**  
+   - At each iteration, Ward’s method merges the two clusters that produce the smallest increase in the total within‐cluster sum of squares (variance).  
+   - Concretely, if merging two clusters leads to a bigger “jump” in the sum of squared distances within that newly formed cluster, it is less favorable. The algorithm picks the pair that increases that sum the least.
+
+3. **Distance Metric**  
+   - In this pipeline, $ distance = (1 - percentID * {100}) $. Therefore, clusters containing sequences with higher identity have a smaller sum of distances (and smaller variance), driving the merges.
+
+4. **Hierarchy**  
+   - The process continues until all points end up in a single cluster. The “hierarchical” aspect yields a dendrogram, which we can cut (or set a max number of clusters) to define final groupings.
+
+**Why Ward’s Method for Our Purposes**:
+
+1. **Minimizing Variance -> Cohesive Clusters**  
+   - Because Ward’s method explicitly minimizes within‐cluster variance, it naturally forms compact, cohesive groups of sequences. In the case of satellite repeats, it means sequences with the highest mutual identity are more decisively clustered together than they might be under single or complete linkage.
+
+2. **Robust Handling of Partial Divergence**  
+   - Beta satellites often have partial homologies, inversions, or moderate divergence. Methods like single linkage can chain distant sequences via one linking edge, while complete linkage can be too strict in certain repetitive contexts.  
+   - Ward’s strikes a balance that respects the overall distribution of pairwise distances within each cluster, typically forming more interpretable subclades.
+
+3. **Interpretability**  
+   - By measuring changes in the sum of squares, Ward’s merges are more systematic and yield a smooth dendrogram structure. Extremely unbalanced merges are less common, making it easier to spot well‐defined clusters of sequences that share stronger identities.
+
+4. **Widely Used in Genomics**  
+   - In many biological clustering scenarios (e.g., gene expression or sequence similarity), Ward’s approach is popular for its variance‐minimizing objective. It helps highlight patterns that reflect strong internal similarity—exactly what we want when grouping repeats into meaningful families or subgroups.
+
+**Step 8**:
+
+Once you have all your clusters defined, you need to recreate a BED file where each sequence is colored based on the cluster that it is in. You can do this with a script called `perid_clusters_to_bed.py` outlined below:
+
+1. **Script Purpose**  
+   - Merges cluster assignment data (from a CSV) with the original BED (which contains strand information) to generate a color‐coded final BED.  
+   - Preserves the correct orientation (+/−) from the original BED while assigning each sequence an RGB color representing its cluster membership.
+
+2. **Inputs**  
+   1. ORIGINAL_BED: A BED file that includes at least 6 columns (chrom, start, end, name, score, strand, …). This is critical because we must preserve the strand info.  
+   2. CLUSTER_CSV: A file with lines like “Sequence,Cluster,” for example:  
+      ```
+      chr1:128105775-128108533,1
+      chr1:128327653-128330414,2
+      ```
+   3. OUTPUT_BED: The path to write the new, colorized BED.
+
+3. **Generate Unique Colors**  
+   - A helper function, `generate_unique_color_map(num_colors=80)`, randomly creates up to 80 unique RGB colors in the format `R,G,B` (or if you have specific colors for specific clusters then you can copy over a color map).  
+   - This ensures each cluster ID can receive a distinct color.
+
+4. **Load Strand Info**  
+   - Reads ORIGINAL_BED line by line, building a dictionary keyed by `"chr:123-456"` -> `(chrom, start, end, strand)`.  
+   - Ensures each sequence name can be matched to a specific orientation from the original data.
+
+5. **Process Cluster Assignments**  
+   - Opens the CLUSTER_CSV, reading each row as `Sequence` (e.g., `"chr1:128105775-128108533"`) and a `Cluster` ID (integer).  
+   - For each sequence, looks up `(chrom, start, end, strand)` from the dictionary.  
+   - Retrieves a color from the color map (`color_map`) based on the cluster ID.
+
+6. **Write Final BED**  
+   - Produces a 9‐column BED line for each sequence, filling:  
+     1. `chrom`  
+     2. `start`  
+     3. `end`  
+     4. `name` (the sequence name)  
+     5. `score` (set to "0")  
+     6. `strand` (taken from the original bed’s 6th column)  
+     7. `thickStart` (set to `start`)  
+     8. `thickEnd` (set to `end`)  
+     9. `itemRgb` (the chosen color string like `"255,0,0"`)  
+   - Writes these lines to OUTPUT_BED.  
+   - Optionally logs warnings for any sequence absent in the dictionary (e.g., if the CSV references a name not found in `ORIGINAL_BED`).
+
+7. **Result**  
+   - The resulting BED file can be uploaded to the UCSC Genome Browser with `itemRgb="On"`, yielding strand‐aware intervals color‐coded by cluster ID.
