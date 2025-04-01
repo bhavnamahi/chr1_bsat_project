@@ -928,3 +928,33 @@ Once you have all your clusters defined, you need to recreate a BED file where e
 
 7. **Result**  
    - The resulting BED file can be uploaded to the UCSC Genome Browser with `itemRgb="On"`, yielding strand‐aware intervals color‐coded by cluster ID.
+
+## cenHap Meeting (03/25/2025)
+- From Julian L.:
+    - Recreate your Fedor plots with your tree on the left axis so that the sequences are displayed together by cluster
+    - On the HG002 replication, the paternal haplotype has an extra beta array on chr1, so do the analysis there as well (we should see something different in this array)
+- In the cenHap paper:
+    - Beta sat annotation could go in the beginning of the paper where we do a high level analysis of chr1 hsat/beta structural polymorphisms
+
+## Chromosome Map (Clustal Omega)
+- Used Hailey's script to create a map of Clustal Omega cluster annotations on chr 1
+
+![Chromosome 1 Clustal Omega Seqs Map](CHM13v2.0_chr1_bsat_annotations_plot_sorted.png)
+
+# To Do List (Week of 3/31)
+- Need to do BSR clustering with just 10 clusters
+- Need to recreate BSR Fedor plot ordered by cluster with dendrogram on left axis
+    - This will confirm clustering results
+- Need to start analysis of HG002
+
+# Redo BSR Clustering with 10 Clusters
+- Need to change this line of the `perid_clustering_Clustal.py` script:
+    
+    `cluster_labels = fcluster(Z, t=20, criterion='maxclust')` to
+    `cluster_labels = fcluster(Z, t=10, criterion='maxclust')`
+- Need to change all output notation to: `perid_10clusters*`
+    - Need to change input notations in `perid_clusters_to_bed.py` to match above
+
+![10 Cluster Clustal Viewing](perid_10clusters_Clustal_GBimage.png)
+
+- It is much easier now to see a pattern on the Clustal track
