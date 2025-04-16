@@ -940,6 +940,7 @@ Once you have all your clusters defined, you need to recreate a BED file where e
 - Used Hailey's script to create a map of Clustal Omega cluster annotations on chr 1
 
 ![Chromosome 1 Clustal Omega Seqs Map](CHM13v2.0_chr1_bsat_annotations_plot_sorted.png)
+![Chromosome 1 Clustal Omega Seqs Map](CHM13v2.0_chr1_bsat_annotations_plot_sorted_ZOOMED.png)
 
 # To Do List (Week of 3/31)
 - Need to do BSR clustering with just 10 clusters
@@ -958,3 +959,48 @@ Once you have all your clusters defined, you need to recreate a BED file where e
 ![10 Cluster Clustal Viewing](perid_10clusters_Clustal_GBimage.png)
 
 - It is much easier now to see a pattern on the Clustal track
+
+![10 Cluster Clustal Dendrogram](perid_10clusters_dendrogram.png)
+![Chromosome 1 Clustal Omega Seqs Map](CHM13v2.0_chr1_bsat_annotations_plot_sorted_10clusters.png)
+![Chromosome 1 Clustal Omega Seqs Map](CHM13v2.0_chr1_bsat_annotations_plot_sorted_10clusters_ZOOMED.png)
+
+```
+
+# Mentor Meeting Notes (04/11/2025)
+- Focus on BSR model only for now
+- Fix up Fedor plots
+- For each cluster identify consensus sequence
+    - Get consensus sequence for each cluster by pulling all into a separate FASTA
+    - Make models specific to each cluster
+        - Extract alignments for model 1
+        - Build an HMM from this alignment OR extract consensus sequence and train on that
+            - Try both methods
+        - Goal is to understand the differences between clusters, what is the variation between clusters (will be better understood with the adjusted Fedor plots)
+    - Ask for more samples if needed to prevent overfitting on CHM13 and HG002
+- Annotate the HG002 genome with the models developed for each cluster
+- Future direction: how are we going to annotate the entire HPRC with respect to population genetics
+    - Careful about how we identify SNPs within smaller BSR repeats
+    - How can we scale up to the HPRC
+        - How can be optimize tree building for a larger scale genome
+- Read SST1 paper to get an idea of the type of analysis we want to do (or other satellite phylogeny model)
+    - Questions we're trying to answer: what's new, what's old, what's shared, where are the variations
+    - Build tree of all beta sats for HPRC like done in Yang paper
+
+# Fedor Plot Alignments
+- Create a copy of plotting script called `plot_alignment_COPY.py`
+- Command to run:
+
+```
+python ../../plot_alignment_COPY.py \
+  --alignment  alignment_in_FASTA_format_Seqret.fa \
+  --pid_table  pairwise_percent_identity.txt \
+  --output_prefix  Clustal_BSR_Alignment_10Clusters_Clusters \
+  --max_clusters 10 \
+  --verbose
+```
+
+20 clusters:
+![20 Cluster Alignment Plot](Clustal_BSR_Alignment_20Clusters_Clusters_dendro_alignment.png)
+
+10 clusters:
+![10 Cluster Alignment Plot](Clustal_BSR_Alignment_10Clusters_Clusters_dendro_alignment.png)
