@@ -964,8 +964,6 @@ Once you have all your clusters defined, you need to recreate a BED file where e
 ![Chromosome 1 Clustal Omega Seqs Map](CHM13v2.0_chr1_bsat_annotations_plot_sorted_10clusters.png)
 ![Chromosome 1 Clustal Omega Seqs Map](CHM13v2.0_chr1_bsat_annotations_plot_sorted_10clusters_ZOOMED.png)
 
-```
-
 # Mentor Meeting Notes (04/11/2025)
 - Focus on BSR model only for now
 - Fix up Fedor plots
