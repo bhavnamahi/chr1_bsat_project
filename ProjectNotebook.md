@@ -992,8 +992,8 @@ Once you have all your clusters defined, you need to recreate a BED file where e
 python ../../plot_alignment_COPY.py \
   --alignment  alignment_in_FASTA_format_Seqret.fa \
   --pid_table  pairwise_percent_identity.txt \
-  --output_prefix  Clustal_BSR_Alignment_10Clusters_Clusters \
-  --max_clusters 10 \
+  --output_prefix  Clustal_BSR_Alignment_20Clusters_Clusters \
+  --max_clusters 20 \
   --verbose
 ```
 
@@ -1002,3 +1002,45 @@ python ../../plot_alignment_COPY.py \
 
 10 clusters:
 ![10 Cluster Alignment Plot](Clustal_BSR_Alignment_10Clusters_Clusters_dendro_alignment.png)
+
+- Plot does not seem to be clustering properly
+    - Check if the plot lines up with Fedor's OG script
+    - Try using the MUSCLE alignment instead of the Clustal Omega
+
+'''
+python ../../plot_alignment_COPY_2.py \
+  --alignment chr1bsatResults5_filtered_rmdup_MUSCLE_aligned.fa \
+  --clusters  perid_clusters_assignments.csv \
+  --colors    ../model5_ClustalOmegaAlignment/perid_clusters_colors.tsv \
+  --sortby    clusters \
+  --output    alignment_by_cluster_M20.png
+'''
+
+- Fedor's alignment by cluster script gave me a slighly better plot
+- Let's try Fedor's plot with my dendrogram on the y-axis
+
+'''
+python ../../plot_alignment_COPY_2_wDendrogram.py \
+  --alignment chr1bsatResults5_filtered_rmdup_MUSCLE_aligned.fa \
+  --clusters  perid_clusters_assignments.csv \
+  --colors    ../model5_ClustalOmegaAlignment/perid_clusters_colors.tsv \
+  --sortby    clusters \
+  --pid_table pairwise_percent_identity.txt \
+  --output_prefix    alignment_M20_with_dendro
+'''
+
+- Didn't plot correctly had to combine dendrogram from plot_alignment_COPY_2_wDendrogram.py with alignment plot from plot_alignment_COPY_2.py
+- Repeat steps for every alignment (CO 10, MUSCLE 20, MUSCLE 10)
+
+![Alignment plot with dendrogram](CO20_Alignment)
+
+# Mentor Meeting (04/18/2025)
+- Get a subset to validate results
+    - Maybe get like a few sequences from each cluster and make sure they map to the right places
+    - Do a manual curation of sequences to see if plots are working right
+- REDO entire clustering alg for MUSCLE alignment
+    - Don't do percent identity clustering -> this is too variable (too simple)
+    - Use UPGMA or neighbor joining instead
+    - Some clustering algs take into account transversion likelihood
+    - Use MEGA-X (Molecular Evolutionary Genetics Analysis) for clustering
+- Talk about HSat alignment with centrolign in next cenhap meeting
