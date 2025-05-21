@@ -1007,19 +1007,19 @@ python ../../plot_alignment_COPY.py \
     - Check if the plot lines up with Fedor's OG script
     - Try using the MUSCLE alignment instead of the Clustal Omega
 
-'''
+```
 python ../../plot_alignment_COPY_2.py \
   --alignment chr1bsatResults5_filtered_rmdup_MUSCLE_aligned.fa \
   --clusters  perid_clusters_assignments.csv \
   --colors    ../model5_ClustalOmegaAlignment/perid_clusters_colors.tsv \
   --sortby    clusters \
   --output    alignment_by_cluster_M20.png
-'''
+```
 
 - Fedor's alignment by cluster script gave me a slighly better plot
 - Let's try Fedor's plot with my dendrogram on the y-axis
 
-'''
+```
 python ../../plot_alignment_COPY_2_wDendrogram.py \
   --alignment chr1bsatResults5_filtered_rmdup_MUSCLE_aligned.fa \
   --clusters  perid_clusters_assignments.csv \
@@ -1027,7 +1027,7 @@ python ../../plot_alignment_COPY_2_wDendrogram.py \
   --sortby    clusters \
   --pid_table pairwise_percent_identity.txt \
   --output_prefix    alignment_M20_with_dendro
-'''
+```
 
 - Didn't plot correctly had to combine dendrogram from plot_alignment_COPY_2_wDendrogram.py with alignment plot from plot_alignment_COPY_2.py
 - Repeat steps for every alignment (CO 10, MUSCLE 20, MUSCLE 10)
@@ -1044,3 +1044,178 @@ python ../../plot_alignment_COPY_2_wDendrogram.py \
     - Some clustering algs take into account transversion likelihood
     - Use MEGA-X (Molecular Evolutionary Genetics Analysis) for clustering
 - Talk about HSat alignment with centrolign in next cenhap meeting
+
+# Using MEGA to Determine Clusters for MUSCLE Alignment
+- First step: Redo MUSCLE alignment
+    - New directory: `model5_NEW_MUSCLEalignment`
+    - Copy over filtered fasta file with all seqs
+    - Run alignment: `muscle -super5 chr1bsatResults5_filtered_rmdup.fa -output chr1bsatResults5_filtered_rmdup_MUSCLE_aligned.fa`
+- Next: Download MEGA [here](https://www.megasoftware.net/)
+- Create neighbor joining/UPGMA trees:
+    - Click 'Phylogeny' -> 'Construct/Test Neighbor Joining Tree' -> Select fasta file -> 'Nucleotide Sequences' -> Protein-coding nucleotide sequence data? 'No' -> Let the tree build
+    - Click 'Phylogeny' -> 'Construct/Test UPGMA Tree' -> Select fasta file -> 'Nucleotide Sequences' -> Protein-coding nucleotide sequence data? 'No' -> Let the tree build
+    - Save newick files for both trees
+    - Save image of both trees as a PDF
+- Now we want to write a script that:
+    - Recreates the trees with the pairwise distance files
+    - Identifies 20 clusters in the tree
+    - Creates a color bar along the bottom of the tree colored by sequence
+    - Creates a csv file with "Node, Cluster" classifications
+    - Filename: `tree_with_clusters.py`
+    - Run with the following command:
+
+```
+# For UPGMA
+python tree_with_clusters.py \
+--tree            MUSCLE_UPGMA_newick.nwk \
+--colors          cluster_colors.tsv \
+--k               20 \
+--out_prefix      UPGMA_tree
+
+# For NJ
+python tree_with_clusters.py \
+--tree            MUSCLE_NJ_newick.nwk \
+--colors          cluster_colors.tsv \
+--k               20 \
+--out_prefix      NJ_tree
+```
+
+- Create a Fedor plot with the new cluster assignments: `python ../../plot_alignment_COPY_2.py --alignment chr1bsatResults5_filtered_rmdup_MUSCLE_aligned.fa --clusters UPGMA_tree_clusters.csv --colors cluster_colors.tsv --sortby clusters --output Fedorplot_UPGMA_MUSCLE.png`
+
+# Mentor Meeting (04/24/2025):
+- Maybe take alignment -> distance matrix -> then tree
+    - Randomly subset maybe ~200 sequences from entire fasta file to practice run
+    - Use BioPython MUSCLE wrapper to do MSA within the script: https://biopython.org/docs/1.76/api/Bio.Align.Applications.html
+    - Use: https://biopython.org/docs/1.76/api/Bio.Phylo.TreeConstruction.html
+        - `classBio.Phylo.TreeConstruction.DistanceCalculator(model='identity', skip_letters=None)`
+- Hailey will get more clarity from Julian next week on what he specifically wants from us
+    - Bsat analysis on just chr1 across haplotypes?
+    - Or bsat analysis genome wide?
+
+# Recreating Tree with Python Bio Package and SciPy
+- Subsample ~200 sequences to run tests using seqtk:
+```
+conda install bioconda::seqtk
+seqtk sample -s100 chr1bsatResults5_filtered_rmdup.fa 200 > chr1bsatResults5_filtered_rmdup_200.fa
+```
+- [Bio.Align](https://biopython.org/docs/1.76/api/Bio.Align.Applications.html)
+- [Bio.Phylo.Tree.Construction](https://biopython.org/docs/1.76/api/Bio.Phylo.TreeConstruction.html)
+- Run the python script to create an alignment, distance matrix, and UPGMA/NJ trees:
+`python align_and_tree.py chr1bsatResults5_filtered_rmdup_200.fa` 
+- Now we need to identify clusters using SciPy
+    - We could use [Bio.Cluster](https://biopython.org/docs/1.76/api/Bio.Cluster.html) but it is not well maintained and uses micro-array expression data not distance matrices
+    - Method: complete linkage
+- Run the script to compute clusters given a distance matrix:
+`python clustering_script.py chr1bsatResults5_filtered_rmdup_200_dist.tsv`
+- Now we need to create Fedor's plot:
+```
+python ../../plot_alignment_copy.py \
+  --alignment chr1bsatResults5_filtered_rmdup_200.afa \
+  --clusters  chr1bsatResults5_filtered_rmdup_200_clusters.csv \
+  --colors    cluster_colors.tsv \
+  --sortby    clusters \
+  --output    chr1bsatResults5_filtered_rmdup_200_clusters_alignment.png
+```
+
+![Complete linkage alignment](model5_NEW_MUSCLEalignment/chr1bsatResults5_filtered_rmdup_200_clusters_alignment_complete.png)
+
+- Clusters are not looking too nice, try clustering via UPGMA and then maximum parsiomony or likelihood
+
+# Mentor Meeting Notes (05/02/2025)
+- If current clustering methods don't work, use [NTRprism](https://github.com/altemose/NTRprism) to identify a HOR for clustering instead
+    - We need a more repeat aware method
+    - Need fasta sequence of region you're interested in
+        - Can try it with entire array and bsr region
+    - Run NTRprism on full array (both CHM13 and both on HG002) 
+        - Can feed one fasta file with all regions so you don't need separate fastas for each type
+    - Run NTRprism on just bsr regions within the array (use RepeatMasker track)
+    - NTRprism find a k-mer and finds every instance of the k-mer and tracks distances between each
+        - Identifies strongest k-mer periodicity
+    - We can tweak the size of the k-mer and windowing 
+    - Outputs: repeat sequences (in a fasta) for each k-mer
+        - Use that repeat spectra to determine target HORs to develop model
+    - Request newer perl script from Hailey
+    - Plotting scripts will be next step (ask Hailey when ready)
+
+# Try UPGMA and MP/ML Clustering
+- Adjust clustering script to first use average linkage: `python clustering_script.py chr1bsatResults5_filtered_rmdup_200_dist.tsv`
+- Recreate plot: 
+```
+python ../../plot_alignment_copy.py \
+  --alignment chr1bsatResults5_filtered_rmdup_200.afa \
+  --clusters  chr1bsatResults5_filtered_rmdup_200_UPGMA_clusters.csv \
+  --colors    cluster_colors.tsv \
+  --sortby    clusters \
+  --output    chr1bsatResults5_filtered_rmdup_200_clusters_alignment_UPGMA.png
+```
+
+![UPGMA linkage alignment](model5_NEW_MUSCLEalignment/chr1bsatResults5_filtered_rmdup_200_clusters_alignment_UPGMA.png)
+
+- Clustering is still not looking good
+- Let's try maximum parsimony clustering (uses alignment file instead of distance matrix): `python clustering_script_MP.py chr1bsatResults5_filtered_rmdup_200.afa`
+```
+python ../../plot_alignment_copy.py \
+  --alignment chr1bsatResults5_filtered_rmdup_200.afa \
+  --clusters  MPclusters/chr1bsatResults5_filtered_rmdup_200_MP_clusters.csv \
+  --colors    cluster_colors.tsv \
+  --sortby    clusters \
+  --output    chr1bsatResults5_filtered_rmdup_200_clusters_alignment_MP.png
+```
+
+![UPGMA linkage alignment](model5_NEW_MUSCLEalignment/chr1bsatResults5_filtered_rmdup_200_clusters_alignment_MP.png)
+
+- This alignment is not looking good either
+- Let's try maximum likelihood clustering: `python clustering_script_ML.py chr1bsatResults5_filtered_rmdup_200.afa`
+```
+python ../../plot_alignment_copy.py \
+  --alignment chr1bsatResults5_filtered_rmdup_200.afa \
+  --clusters  chr1bsatResults5_filtered_rmdup_200_ML_clusters.csv \
+  --colors    cluster_colors.tsv \
+  --sortby    clusters \
+  --output    chr1bsatResults5_filtered_rmdup_200_clusters_alignment_ML.png
+```
+
+# NTRPrism Analysis
+- Get entire bsat array from UCSC GB for: CHM13, HG002 maternal, HG002 paternal
+    - CHM13: 496203 bp -> chr1:128098616-128594818
+    - HG002 Mat: 486039 bp -> chr1:128017958-128503997
+    - HG002 Pat 1: 439433 bp -> chr1:140919630-141359063
+    - HG002 Pat 2: 491695 bp -> chr1:142180330-142672025
+- Get just the signature BSR regions from UCSC GB RepeatMasker track for: CHM13, HG002 maternal, HG002 paternal
+    - CHM13: 65 sequences
+    - HG002 Mat: 64 sequences
+    - HG002 Pat 1/2 (combined both array BSRs in one fasta): 109 sequences
+- Run NTRprism on all fastas with [perl script](https://github.com/altemose/HSatReview/blob/main/Code/NTRprism_ProcessFasta_v0.3e.pl)
+- Created full NTRprism test run to act on all fastas based on [README.md](https://github.com/altemose/NTRprism#full-test-run): NTR_full_run.sh
+
+# Mentor Meeting 05/16/2025
+- Running NTRprism
+    - No need to generate spectra
+    - Focus on TopHits file
+    - Focus on BSR regions first
+    - Run NTR on fasta with all bsr regions from all haplotypes
+    - The span does not need to cover the entire array
+- Prepare presentation for meeting with Julian and Miga Lab
+    - Think of this from a deliverable perspective
+        - What figure do we want to generate for the CenSat paper
+        - Look at other papers for guidance
+    - 2 comparisons: how do haplotypes within the array vary vs against other reference genomes
+        - Try to do the alignment and clustering within just CHM13 first and then compare against other reference HG002
+    - Question -> what we did -> results (what is really our end goal, painted in tree? painted in array?, how do we go to a larger sample set from here?, how to make inferences and conclusions from this data?)
+    - Why are we looking for HORs now
+- Don't get too hung up on the clustering (we can assign this manually)
+    - Focus on how good the alignments look like
+
+# Run NTRprism on BSR Regions (CHM13 and HG002)
+```
+perl ../../NTRprism_ProcessFasta_v0.3e.pl \
+     ../../FAs/chm13_hg002_bSat_BSRs.fa \
+     defaultParams \
+     20000 5 6 1 0 0 
+```
+- Span: 20000
+- Minimum k-mer count: 5
+- K-mer length: 6
+- Bin size: 1
+- Suppress matrix output: 0
+- Suppress fasta output: 0
