@@ -1032,7 +1032,7 @@ python ../../plot_alignment_COPY_2_wDendrogram.py \
 - Didn't plot correctly had to combine dendrogram from plot_alignment_COPY_2_wDendrogram.py with alignment plot from plot_alignment_COPY_2.py
 - Repeat steps for every alignment (CO 10, MUSCLE 20, MUSCLE 10)
 
-![Alignment plot with dendrogram](CO20_Alignment)
+![Alignment plot with dendrogram](CO20_Alignment.png)
 
 # Mentor Meeting (04/18/2025)
 - Get a subset to validate results
@@ -1162,7 +1162,7 @@ python ../../plot_alignment_copy.py \
   --output    chr1bsatResults5_filtered_rmdup_200_clusters_alignment_MP.png
 ```
 
-![UPGMA linkage alignment](model5_NEW_MUSCLEalignment/chr1bsatResults5_filtered_rmdup_200_clusters_alignment_MP.png)
+![MP linkage alignment](model5_NEW_MUSCLEalignment/chr1bsatResults5_filtered_rmdup_200_clusters_alignment_MP.png)
 
 - This alignment is not looking good either
 - Let's try maximum likelihood clustering: `python clustering_script_ML.py chr1bsatResults5_filtered_rmdup_200.afa`
