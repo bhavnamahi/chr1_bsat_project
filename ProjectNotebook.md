@@ -685,14 +685,14 @@ Modified `centrolign` parameters:
 
     - Balancing alignment speed: Fewer anchors pass the filter, so the alignment process runs more efficiently.
 
-    Essentially, lowering max_count is a precision trade‐off: you ignore super‐high‐copy k‐mers or local repeats, which often helps in repetitive contexts so your aligner doesn’t over‐interpret those repeats as “valid anchors.”
+    Essentially, lowering max_count is a precision trade-off: you ignore super-high-copy k-mers or local repeats, which often helps in repetitive contexts so your aligner doesn’t over-interpret those repeats as “valid anchors.”
 
 2. The maximum number of matches between two graphs that will be considered during chaining
 `max_num_match_pairs`: 625000 (down from original 1250000)
 
     `max_num_match_pairs` controls how many total anchor pairs can be retained for chain building.
 
-    - Avoiding memory/time blow‐up: In highly repetitive or long regions, the number of potential anchor matches can skyrocket. Halving `max_num_match_pairs` to 625k helps manage large alignment tasks.
+    - Avoiding memory/time blow-up: In highly repetitive or long regions, the number of potential anchor matches can skyrocket. Halving `max_num_match_pairs` to 625k helps manage large alignment tasks.
 
     - Streamlined chaining: With fewer match pairs, the chaining process is less likely to be overwhelmed by borderline or redundant anchors.
 
@@ -714,7 +714,7 @@ Modified `centrolign` parameters:
 
     - Simplicity: You tell the aligner not to skip or mask any sub-region. Instead, it attempts to align everything, possibly revealing partial alignments in complicated, repetitive blocks.
 
-    - Fewer heuristics: The advanced partitioning modes (1–3) can sometimes skip or break up repetitive segments if they fail certain score thresholds. By disabling partitioning, you ensure you capture all potential alignment signals—especially if you’re exploring novel or poorly annotated repeats.
+    - Fewer heuristics: The advanced partitioning modes (1-3) can sometimes skip or break up repetitive segments if they fail certain score thresholds. By disabling partitioning, you ensure you capture all potential alignment signals—especially if you’re exploring novel or poorly annotated repeats.
 
     In repetitive contexts, toggling this off might allow more direct control over how anchors chain, particularly if you’re manually adjusting other thresholds (like `max_count`, `max_num_match_pairs`).
 
@@ -722,7 +722,7 @@ Modified `centrolign` parameters:
 
     This sets the lowest total alignment score for a segment to be considered alignable.
 
-    - Lower threshold -> more segments pass: Reduces the minimum anchor‐chain “score” needed, allowing coverage of slightly lower‐similarity segments.
+    - Lower threshold -> more segments pass: Reduces the minimum anchor-chain “score” needed, allowing coverage of slightly lower-similarity segments.
 
     - Capturing borderline repeats: If your array has moderate or partial matches, a lower threshold ensures those partial alignments survive, rather than being thrown out.
 
@@ -732,9 +732,9 @@ Modified `centrolign` parameters:
 
 We conduct the alignment with an automated alignment script, `centrolign_automater.sh` that is outlined below:
 
-1. **Command‐Line Argument Handling**  
+1. **Command-Line Argument Handling**  
    - Checks for exactly two arguments:  
-     1) A multi‐sequence FASTA file containing all sequences of interest.  
+     1) A multi-sequence FASTA file containing all sequences of interest.  
      2) An output directory to store pairwise alignment results.  
    - Exits with a usage message if arguments are incorrect.
 
@@ -748,10 +748,10 @@ We conduct the alignment with an automated alignment script, `centrolign_automat
 
 4. **Pairwise Alignment Loop**  
    - Iterates over each pair of sequences (i < j) so each pair is aligned once:
-     - Avoids self‐self comparisons and duplicate reversed pairs.
+     - Avoids self-self comparisons and duplicate reversed pairs.
 
 5. **Temporary FASTA Construction**  
-   - For each pair, an awk command extracts only those two sequences (by name) from the multi‐sequence FASTA into a temporary FASTA file.  
+   - For each pair, an awk command extracts only those two sequences (by name) from the multi-sequence FASTA into a temporary FASTA file.  
    - This ensures `centrolign` receives exactly those two sequences for alignment.
 
 6. **Centrolign Config Updates**  
@@ -774,7 +774,7 @@ We conduct the alignment with an automated alignment script, `centrolign_automat
 After you have a directory of all the alignments, you want to calculate the percent identity between all the clusters. You can do this with a script called `calculate_centrolign_identity.py` outlined below:
 
 1. **FASTA Parsing (`parse_fasta_lengths`)**  
-   - Reads a multi‐sequence FASTA file (e.g., containing sequences like `>chr1:123-456`).  
+   - Reads a multi-sequence FASTA file (e.g., containing sequences like `>chr1:123-456`).  
    - Tracks the cumulative length for each sequence.  
    - Returns a dictionary mapping `sequence_name -> length` (e.g. `{"chr1:123-456": 3345, ...}`).
 
@@ -813,12 +813,12 @@ Once you've calculated all the percent identities from the alignment directory, 
 
 2. **Reading Pairwise Percent Identity**  
    - `PERCENT_FILE` is read into a `pandas DataFrame`.  
-   - Trailing “%” is stripped, and the numeric values are interpreted as floating‐point.  
+   - Trailing “%” is stripped, and the numeric values are interpreted as floating-point.  
    - Collects all unique sequence names from the two columns (“Seq1”, “Seq2”).
 
 3. **Distance Matrix Construction**  
    - Creates an NxN matrix for N total sequences.  
-   - Fills each cell with `1 – (PercentIdentity/100)` to obtain the “distance.”  
+   - Fills each cell with `1 - (PercentIdentity/100)` to obtain the “distance.”  
    - Missing pairs (NaN) are replaced with a distance of 1.0, ensuring every pair has a valid distance.
 
 4. **Hierarchical Clustering**  
@@ -829,11 +829,11 @@ Once you've calculated all the percent identities from the alignment directory, 
 5. **Dendrogram Plotting**  
    - Creates a large figure with a main axis for the dendrogram.  
    - Sets `color_threshold=0` and `above_threshold_color='black'`, ensuring all branches are black.  
-   - The x‐axis labels (sequence names) have a reduced font size to accommodate large sets of sequences.
+   - The x-axis labels (sequence names) have a reduced font size to accommodate large sets of sequences.
 
 6. **Cluster Assignments & Output**  
    - Saves cluster labels to a CSV (`perid_clusters_assignments.csv`).  
-   - Also writes a human‐readable text file grouping sequences by cluster ID.
+   - Also writes a human-readable text file grouping sequences by cluster ID.
 
 7. **Color Bar & Legend**  
    - Creates a 1×N color bar below the dendrogram, mapping each leaf node’s cluster to a distinct color (unique to Model 5).  
@@ -842,7 +842,7 @@ Once you've calculated all the percent identities from the alignment directory, 
 
 8. **Final Figure Save**  
    - Combines the dendrogram, color bar, and legend into one figure.  
-   - Exports as a high‐resolution `.png`, concluding the script.
+   - Exports as a high-resolution `.png`, concluding the script.
 
 Please note that a similar method is used to cluster based on size of the sequences in Model 2. The only difference is that the criteria for clustering is sequence length and not percent identity.
 
@@ -850,7 +850,7 @@ Please note that a similar method is used to cluster based on size of the sequen
 
 **Ward’s Method**:
 
-Ward’s method is a specific type of agglomerative hierarchical clustering that focuses on minimizing the total within‐cluster variance (or sum of squared distances) at every merge step. Below is a detailed discussion of how it operates and why it is suited for clustering repetitive sequence identity data.
+Ward’s method is a specific type of agglomerative hierarchical clustering that focuses on minimizing the total within-cluster variance (or sum of squared distances) at every merge step. Below is a detailed discussion of how it operates and why it is suited for clustering repetitive sequence identity data.
 
 **How Ward’s Method Works**:
 
@@ -858,7 +858,7 @@ Ward’s method is a specific type of agglomerative hierarchical clustering that
    - Each sequence (data point) starts in its own cluster.
 
 2. **Iterative Merging**  
-   - At each iteration, Ward’s method merges the two clusters that produce the smallest increase in the total within‐cluster sum of squares (variance).  
+   - At each iteration, Ward’s method merges the two clusters that produce the smallest increase in the total within-cluster sum of squares (variance).  
    - Concretely, if merging two clusters leads to a bigger “jump” in the sum of squared distances within that newly formed cluster, it is less favorable. The algorithm picks the pair that increases that sum the least.
 
 3. **Distance Metric**  
@@ -870,24 +870,24 @@ Ward’s method is a specific type of agglomerative hierarchical clustering that
 **Why Ward’s Method for Our Purposes**:
 
 1. **Minimizing Variance -> Cohesive Clusters**  
-   - Because Ward’s method explicitly minimizes within‐cluster variance, it naturally forms compact, cohesive groups of sequences. In the case of satellite repeats, it means sequences with the highest mutual identity are more decisively clustered together than they might be under single or complete linkage.
+   - Because Ward’s method explicitly minimizes within-cluster variance, it naturally forms compact, cohesive groups of sequences. In the case of satellite repeats, it means sequences with the highest mutual identity are more decisively clustered together than they might be under single or complete linkage.
 
 2. **Robust Handling of Partial Divergence**  
    - Beta satellites often have partial homologies, inversions, or moderate divergence. Methods like single linkage can chain distant sequences via one linking edge, while complete linkage can be too strict in certain repetitive contexts.  
    - Ward’s strikes a balance that respects the overall distribution of pairwise distances within each cluster, typically forming more interpretable subclades.
 
 3. **Interpretability**  
-   - By measuring changes in the sum of squares, Ward’s merges are more systematic and yield a smooth dendrogram structure. Extremely unbalanced merges are less common, making it easier to spot well‐defined clusters of sequences that share stronger identities.
+   - By measuring changes in the sum of squares, Ward’s merges are more systematic and yield a smooth dendrogram structure. Extremely unbalanced merges are less common, making it easier to spot well-defined clusters of sequences that share stronger identities.
 
 4. **Widely Used in Genomics**  
-   - In many biological clustering scenarios (e.g., gene expression or sequence similarity), Ward’s approach is popular for its variance‐minimizing objective. It helps highlight patterns that reflect strong internal similarity—exactly what we want when grouping repeats into meaningful families or subgroups.
+   - In many biological clustering scenarios (e.g., gene expression or sequence similarity), Ward’s approach is popular for its variance-minimizing objective. It helps highlight patterns that reflect strong internal similarity—exactly what we want when grouping repeats into meaningful families or subgroups.
 
 **Step 8**:
 
 Once you have all your clusters defined, you need to recreate a BED file where each sequence is colored based on the cluster that it is in. You can do this with a script called `perid_clusters_to_bed.py` outlined below:
 
 1. **Script Purpose**  
-   - Merges cluster assignment data (from a CSV) with the original BED (which contains strand information) to generate a color‐coded final BED.  
+   - Merges cluster assignment data (from a CSV) with the original BED (which contains strand information) to generate a color-coded final BED.  
    - Preserves the correct orientation (+/−) from the original BED while assigning each sequence an RGB color representing its cluster membership.
 
 2. **Inputs**  
@@ -913,7 +913,7 @@ Once you have all your clusters defined, you need to recreate a BED file where e
    - Retrieves a color from the color map (`color_map`) based on the cluster ID.
 
 6. **Write Final BED**  
-   - Produces a 9‐column BED line for each sequence, filling:  
+   - Produces a 9-column BED line for each sequence, filling:  
      1. `chrom`  
      2. `start`  
      3. `end`  
@@ -927,7 +927,7 @@ Once you have all your clusters defined, you need to recreate a BED file where e
    - Optionally logs warnings for any sequence absent in the dictionary (e.g., if the CSV references a name not found in `ORIGINAL_BED`).
 
 7. **Result**  
-   - The resulting BED file can be uploaded to the UCSC Genome Browser with `itemRgb="On"`, yielding strand‐aware intervals color‐coded by cluster ID.
+   - The resulting BED file can be uploaded to the UCSC Genome Browser with `itemRgb="On"`, yielding strand-aware intervals color-coded by cluster ID.
 
 ## cenHap Meeting (03/25/2025)
 - From Julian L.:
@@ -1207,6 +1207,7 @@ python ../../plot_alignment_copy.py \
     - Focus on how good the alignments look like
 
 # Run NTRprism on BSR Regions (CHM13 and HG002)
+- Run NTR on BSR regions only:
 ```
 perl ../../NTRprism_ProcessFasta_v0.3e.pl \
      ../../FAs/chm13_hg002_bSat_BSRs.fa \
@@ -1219,3 +1220,277 @@ perl ../../NTRprism_ProcessFasta_v0.3e.pl \
 - Bin size: 1
 - Suppress matrix output: 0
 - Suppress fasta output: 0
+- Run NTR on entire bSat arrays:
+```
+perl ../../NTRprism_ProcessFasta_v0.3e.pl \
+     ../../FAs/chm13_hg002_bSat_arrays.fa \
+     defaultParams \
+     20000 5 6 1 0 0 
+```
+- TopHits only showing BSR region for all 4 arrays (try increasing span to cover entire array)
+```
+perl ../../NTRprism_ProcessFasta_v0.3e.pl \
+     ../../FAs/chm13_hg002_bSat_arrays.fa \
+     defaultParams \
+     500000 5 6 1 0 0 
+```
+
+# Mentor Meeting (05/23/2025)
+- Try putting 200 seqs into Clustal Omega and create Fedor plot
+- In RepeatMasker the repeat monomer for BSR is a dimer
+    - Known SNP in original BSR unit definition (Waye Willard paper)
+    - See if Waye/Willard SNP at position 25 exists on alignment plots
+- Double check that alignments are using MUSCLE alignment file
+    - Subset based on variants and see if Fedor plot aligns better
+- In NTR TopHits of BSR seqs
+    - We see 68 hit, then 137, then variable number
+- Plot spectra for BSR TopHits
+- HSat centrolign
+    - HSat3 on HG002 on chr9
+    - Run centrolign on 2 haplotypes first and then on the entire HPRC
+    - Might be able to get graph from Sasha to find 2 closely related haplotypes
+    - Try it first on arrays on CHM13 and HG002
+    - Create alignment plot with alignment line going through (Jordan's script)
+    - Hailey will send chr9 bed files for hsat3 for CHM13 and HG002 and another smaller array that should be alignable
+- Be prepared to discuss BSats or HSats at Wed CenSat meeting
+
+# Mentor Meeting (05/30/2025) w/ Hailey + Julian L.
+- For upcoming CenSat meeting on 6/11 and Miga Lab meeting on 6/2
+    - Have take home points of failed BSR experiments
+    - Interpret funky results
+    - Don't bring up the HSat stuff, have a really good bSat story instead
+    - For Miga meeting on 6/2, keep it to 10 minutes
+        - Explain very dead obvious points
+- For BSR alignment:
+    - ML/MP/UPGMA is not the best for clustering randomly mutating regions like BSR
+    - Don't subsample, plot all 3600+ sequences
+    - Gauge similarity between flanking regions and center regions
+    - Redo Fedor plot by position instead of clusters
+        - Should be able to see more similarity and alignment this way
+    - After new Fedor plot:
+        - Karen's view: look for recurrent mutations
+        - Look for regions that align with recurring mutations -> do a bin alignment of those regions -> look for >5-10% biallelic frequency and look at those cleaner alignments
+- Plot NTR results (spectra and heatmap)
+    - Spectra plot will give insight into dimers
+        - There should be a huge drop off after top hits if a larger HOR exists
+        - So far the TopHits file has showed that we don't have any significant top hits except variables of the 68 bp monomer
+- For figure in CenSat paper:
+    - Look at HPRC acrocentric p-arm paper for figure idea
+        - Once we have several haplotypes, we can show those in a dendrogram or a radial tree
+
+# Creating NTR spectra plots
+```
+# CHM 13
+Rscript NTRprism_PlotSpectrum.r --args \
+    bSat_NTR_outputs/defaultParams/array.region_chr1_chm13_bSat_array.128098616.128594818.span20000.k6.mincount5.bin1.txt \
+    array.region_chr1_chm13_bSat_array.128098616.128594818.span20000.k6.mincount5.bin1.txt \
+    20000 \
+    output_spectrum
+
+# HG002 maternal
+Rscript NTRprism_PlotSpectrum.r --args \
+    bSat_NTR_outputs/defaultParams/array.region_chr1_hg002_mat_bSat_array.128017958.128503997.span20000.k6.mincount5.bin1.txt \
+    array.region_chr1_hg002_mat_bSat_array.128017958.128503997.span20000.k6.mincount5.bin1.txt \
+    20000 \
+    output_spectrum
+
+# HG002 paternal array 1
+Rscript NTRprism_PlotSpectrum.r --args \
+    bSat_NTR_outputs/defaultParams/array.region_chr1_hg002_pat_bSat_array.140919630.141359063.span20000.k6.mincount5.bin1.txt \
+    array.region_chr1_hg002_pat_bSat_array.140919630.141359063.span20000.k6.mincount5.bin1.txt \
+    20000 \
+    output_spectrum
+
+# HG002 paternal array 2
+Rscript NTRprism_PlotSpectrum.r --args \
+    bSat_NTR_outputs/defaultParams/array.region_chr1_hg002_pat_bSat_array.142180330.142672025.span20000.k6.mincount5.bin1.txt \
+    array.region_chr1_hg002_pat_bSat_array.142180330.142672025.span20000.k6.mincount5.bin1.txt \
+    20000 \
+    output_spectrum
+```
+
+# BSR Plotting by Position
+- Use entire sample
+- Rerun muscle alignment
+- plot Fedor plot by position: `python3 plot_alignment_copy.py --alignment chr1bsatResults5_filtered_rmdup_MUSCLE_aln.fa --output chr1bsatResults5_filtered_rmdup_MUSCLE_aln.png --sortby coords`
+
+# Mentor Meeting (06/06/2025)
+- Paint onto the array that have the black and the red
+- Talk to Julian about allele frequency
+- Remake positional plot with duplicates included
+- Make the same plots for HG002 pat and mat
+    - For pat array do one for each array, and then one combined one (add a line to signify split)
+    - Need to train HMMER models for these references
+
+# Making more positional alignment plots
+- Create plot for chm13 BSRs with duplicates include (filtered from 65 to 70 bp): `python3 plot_alignment_copy.py --alignment aln.fa --output aln.png --sortby coords`
+- Create plots for HG002 haplotypes
+    1. Create HMM models for each haplotype -> need FASTAs of each array region
+    2. Convert HMM output to BED
+    3. Get FASTA from BED (2 for pat hap)
+    4. Align FASTAs with MUSCLE (2 for each pat hap array, and then 1 combined)
+    5. Create alignment plots
+
+```
+# Build the HMM and convert the output
+hmmbuild myModel.hmm mySeq.alignment.fa
+time nhmmer --cpu 12 --notextw --noali --tblout genome.model.out modelName.hmm /path/to/genome.fa
+awk -v th=0.5 -f hmmertblout2bed.awk genome.out > genome.model.bed
+
+# Filter by length
+awk '{ if(($3 - $2) >= 65 && ($3 - $2) <= 70) print }' bed > filtered.bed
+
+# To convert the hmm bed to a fasta
+bedtools getfasta -fi inputFASTA -bed BEDfile -fo outputFASTA -s
+
+# Align the fasta file
+muscle -super5 filtered.fa -output filtered_aligned.fa
+
+python3 plot_alignment_copy.py --alignment aln.fa --output MUSCLE_aln.png --sortby coords
+```
+- HG002 maternal
+    - HMMER annotations: 4826
+    - Filtered annotation: 3786
+- HG002 paternal
+    - HMMER annotations: 8351
+    - Filtered annotation: 6606
+    - HG002 Pat 1: 439433 bp -> chr1:140919630-141359063: 3463
+    - HG002 Pat 2: 491695 bp -> chr1:142180330-142672025: 6606
+- Plotting script colors: 
+    - Dim (background) colors - show the ancestral (consensus) base at each column:
+        - Pale green (RGB ~ 0.9, 1, 0.9) -> ancestral A
+        - Pale red/pink (RGB ~ 1, 0.9, 0.9) -> ancestral T
+        - Pale yellow (RGB ~ 1, 1, 0.9) -> ancestral G
+        - Pale blue (RGB ~ 0.9, 0.9, 1) -> ancestral C
+        - Light gray (RGB ~ 0.9, 0.9, 0.9) -> ancestral gap (-)
+    - Bright (foreground) colors - highlight any nucleotide that differs from the ancestral base at that position:
+        - Bright green (RGB = 0, 1, 0) -> a non-ancestral A (i.e. mutation to A)
+        - Bright red (RGB = 1, 0, 0) -> a non-ancestral T (i.e. mutation to T)
+        - Bright yellow (RGB = 1, 1, 0) -> a non-ancestral G (i.e. mutation to G)
+        - Bright blue (RGB = 0, 0, 1) -> a non-ancestral C (i.e. mutation to C)
+        - Black (RGB = 0, 0, 0) -> a gap (-) that differs from ancestral
+
+# Cleaning up plot with BMGE and redo Fedor plot
+- Code from Julian: 
+```
+conda create -c bioconda bmge -n bmge 
+conda activate bmge 
+
+bmge \
+    -i my_sample.aligned.fa \
+    -t DNA \
+    -of my_sample.aligned.bmge.fa \
+    -oh my_sample.aligned.bmge.html
+```
+
+# Censat Meeting (06/18/2025)
+- Beta sat alignment with only MUSCLE is too long (lots of gap regions)
+- BMGE trims aln down from 100 to 30 bp
+    - This is too much trimming
+    - Need to adjust parameters
+        - Look into entropy calculations
+    - Check edge regions for artifacts
+    - Plot end regions to see how they compare in the array spatially to other composites
+
+# BMGE modifications
+1. Use a More Permissive Substitution Matrix (-m)
+Lower BLOSUM or higher PAM matrix numbers are more relaxed.
+
+If you're using amino acid alignments:
+
+Switch from -m BLOSUM95 or BLOSUM90 to something like:
+
+`-m BLOSUM45`
+
+If you're using DNA alignments:
+
+Try a higher PAM matrix:
+
+`-m DNAPAM250:4`
+
+2. Raise the Entropy Threshold (-h)
+Default is -h 0.5. Raise this to include more variable sites:
+
+`-h 0.8`
+
+Or disable entropy filtering entirely (not recommended long term):
+
+`-h 1`
+
+3. Allow More Gaps (-g)
+BMGE removes columns with >20% gaps by default.
+
+Relax it by allowing more gaps (e.g. 60%):
+
+`-g 0.6`
+
+Or skip gap filtering altogether (not recommended unless needed):
+
+`-g 1`
+
+4. Reduce the Minimum Block Size (-b)
+BMGE discards blocks shorter than 5 columns.
+
+Reduce to 3 or even 1 if short conserved regions are important:
+
+`-b 3`
+
+# Mentor Meeting (06/20/2025)
+- Calculations of entropy in BMGE
+    - Adjust parameters to adjust trimming
+- Wed 6/25 presentation:
+    - Positional alignment summary
+    - Important points:
+        - Alignments by position
+        - Relative positions of BSR relative to composites (show BSR vs composites on chr1)
+            - Plot horizontal lines on plot of where composites start (try to do at least minimally CHM13)
+        - Entropy of all alignment positions (plot along x-axis columns)
+- Make sure sequences don't overlap -> ensures we're working with unique sequences and not causing issues at the ends of our alignments
+
+# CenSat Meeting (06/25/2025)
+- Do a ModDotPlot of HG002 paternal array 2
+    - Command: `moddotplot interactive -f ../chr1_bsat_project/model5/model5_NTRPrism/FAs/hg002_chr1_pat_bsat_array2.fa`
+- Adjust entropy parameters for BMGE
+```
+bmge \
+    -i chr1bsatResults5_filtered_MUSCLE_aln.fa \
+    -t DNA \
+    -h 0.8 \
+    -of chr1bsatResults5_filtered_MUSCLE_aln_bmge_ent08.fa \
+    -oh chr1bsatResults5_filtered_MUSCLE_aln_bmge_ent08.html
+
+python3 plot_alignment_copy.py --alignment aln.fa --output aln.png --sortby coords
+
+bmge \
+    -i chr1bsatResults5_filtered_MUSCLE_aln.fa \
+    -t DNA \
+    -h 0.8 \
+    -m DNAPAM250:4 \
+    -of chr1bsatResults5_filtered_MUSCLE_aln_bmge_ent08_p250.fa \
+    -oh chr1bsatResults5_filtered_MUSCLE_aln_bmge_ent08_p250.html
+
+python3 plot_alignment_copy.py --alignment chr1bsatResults5_filtered_MUSCLE_aln_bmge_ent08_p250.fa --output chr1bsatResults5_filtered_MUSCLE_aln_bmge_ent08_p250.png --sortby coords
+```
+
+# Mentor Meeting (06/27/2025)
+- Where do strands switch relative to the repeat model (Matt Franklin suggestion)
+    - Which monomer does the strand switch consistently occur
+    - Location of inversions can inform breaking/expansion mechanisms
+        - How can our findings inform research of individuals like Matt
+- Add color bar to right side of aln plot to account for strand
+
+# Add strand color bar to plot
+- Run: `python3 plot_alignment_str.py --alignment chr1bsatResults5_filtered_MUSCLE_aln_bmge_ent08.fa --output chr1bsatResults5_filtered_MUSCLE_aln_bmge_ent08_str.png --sortby coords --bed ../chr1bsatResults5_filtered.bed`
+
+# Mentor Meeting (07/18/2025)
+- Keep working on strand switch analysis for now
+- Create nucleotide logo plot w/ nucleotide compositions at mid point of strand switch regions
+- Compare RepeatMasker annotations with strand orientation
+    - See repeat type where switch happens to explain motif to people
+- Could just write script to get seqs
+    - Get bed of positions where switch happens
+    - Script gets nucleotides to the left and right of mid position
+- Define a strand switch (what is really a switch)
+    - Look at larger blocks of composites
+    - Look at strand switching more relative to array blocks
+- Dotplot may show where switch is happening in a smaller pre-defined region
